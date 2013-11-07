@@ -2,6 +2,7 @@
 #
 
 import xml.dom.minidom
+import sys
 
 def __parseopts(self):
     parser = OptionParser(usage='''%prog [OPTIONS]
@@ -18,13 +19,19 @@ John Hover <jhover@bnl.gov>
 
 
 def main():
-    xmldoc = xml.dom.minidom.parseString(output).documentElement
-    nodelist = []
-    for c in listnodesfromxml(xmldoc, 'c') :
-        node_dict = node2dict(c)
-        nodelist.append(node_dict)            
-    log.info('Got list of %d entries.' %len(nodelist))       
-
+    print(sys.argv)
+    files = sys.argv[1:]
+    print(files)
+    for f in files:
+        fh = open(f)
+        output = fh.read()
+        print(output)
+        xmldoc = xml.dom.minidom.parseString(output).documentElement
+    #nodelist = []
+    #for c in listnodesfromxml(xmldoc, 'c') :
+    #    node_dict = node2dict(c)
+    #    nodelist.append(node_dict)            
+    #log.info('Got list of %d entries.' %len(nodelist))       
 
 
 if __name__ == "__main__":
