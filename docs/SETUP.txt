@@ -1,0 +1,68 @@
+https://rc.coepp.org.au/cloud/imagefactory_openstack
+
+PLATFORM INFO
+
+Build Host:
+[root@grid06 imagefactory]# cat /etc/redhat-release 
+Red Hat Enterprise Linux Workstation release 6.4 (Santiago)
+
+[root@grid06 yum.repos.d]# cat imagefactory.repo epel.repo 
+[imagefactory-testing]
+name=Image Factory Testing - $releasever - $basearch
+baseurl=http://repos.fedorapeople.org/repos/aeolus/imagefactory/testing/repos/rhel/$releasever/$basearch/
+gpgcheck=0
+enabled=1
+
+[imagefactory-testing-source]
+name=Image Factory Testing - $releasever - $basearch
+baseurl=http://repos.fedorapeople.org/repos/aeolus/imagefactory/testing/repos/rhel/$releasever/source/
+gpgcheck=0
+enabled=0
+
+[epel]
+name=Extra Packages for Enterprise Linux 6 - $basearch
+#baseurl=http://extcob02.racf.bnl.gov/cobbler/repo_mirror/epel/6/$basearch
+baseurl=http://extcob02.racf.bnl.gov/cobbler/repo_mirror/epel/6/$basearch
+enabled=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-6
+
+
+RPMS 
+
+imagefactory-1.1.3-1.el6.noarch
+imagefactory-plugins-1.1.3-1.el6.noarch
+imagefactory-plugins-EC2Cloud-1.1.2_423_g2c98232-1.el6.noarch
+imagefactory-plugins-EC2Cloud-JEOS-images-1.1.2_423_g2c98232-1.el6.noarch
+imagefactory-plugins-FedoraOS-1.1.2_423_g2c98232-1.el6.noarch
+imagefactory-plugins-MockRPMBasedOS-1.1.2_423_g2c98232-1.el6.noarch
+imagefactory-plugins-MockSphere-1.1.2_423_g2c98232-1.el6.noarch
+imagefactory-plugins-OpenStackCloud-1.1.2_423_g2c98232-1.el6.noarch
+imagefactory-plugins-ovfcommon-1.1.3-1.el6.noarch
+imagefactory-plugins-RHEVM-1.1.3-1.el6.noarch
+imagefactory-plugins-vSphere-1.1.3-1.el6.noarch
+
+euca2ools-2.1.4-1.el6.noarch
+
+python-glanceclient-0.8.0-2.el6.noarch
+
+
+
+
+
+
+FIXES, CAVEATS
+
+Fix augeas via guestfs:
+
+ Adding these to the supermin hostfiles (/usr/lib64/guestfs/supermin.d/hostfiles) resolved the issue:
+
+ /usr/share/augeas/lenses/dist/quote.aug
+ /usr/share/augeas/lenses/dist/simplevars.aug
+
+Ensure imagefactory/oz dirs are sufficiently big to handle images
+
+
+
+
+

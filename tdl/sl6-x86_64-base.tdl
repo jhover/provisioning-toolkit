@@ -1,0 +1,13 @@
+<template>
+  <name>SL 6 x86_64 - Basic Install</name>
+  <os>
+    <rootpw>griddev</rootpw>
+    <name>RHEL-6</name>
+    <version>3</version>
+    <arch>x86_64</arch>
+    <install type='iso'>
+      <iso>http://dev.racf.bnl.gov/yum/snapshots/rhel6/sl63-x86_64-iso/SL-63-x86_64-2012-08-02-Install-DVD.iso</iso>
+    </install>
+  </os>
+  <description>SL 6 - Basic Install</description>
+</template>

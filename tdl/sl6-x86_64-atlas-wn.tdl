@@ -1,0 +1,86 @@
+<template>
+  <name>SL 6 x86_64 ATLAS WN</name>
+  <os>
+    <rootpw>griddev</rootpw>
+    <name>RHEL-6</name>
+    <version>3</version>
+    <arch>x86_64</arch>   
+    <install type='iso'>
+      <iso>http://dev.racf.bnl.gov/yum/snapshots/rhel6/sl63-x86_64-iso/SL-63-x86_64-2012-08-02-Install-DVD.iso</iso>
+    </install>
+  </os>
+
+  <description>SL 6 - Basic Install</description>
+
+  <repositories>
+    <repository name='sl63-x86_64-os'>
+        <url>http://dev.racf.bnl.gov/yum/snapshots/rhel6/sl63-x86_64-os-2013-04-05/x86_64</url>
+        <signed>yes</signed>
+        <persisted>True</persisted>
+    </repository>
+    <repository name='sl63-x86_64-updates'>
+        <url>http://dev.racf.bnl.gov/yum/snapshots/rhel6/sl63-x86_64-updates-2013-04-05/x86_64</url>
+        <signed>yes</signed>
+      <persisted>True</persisted>
+    </repository>
+    <repository name='racf-grid-testing'>
+      <url>http://dev.racf.bnl.gov/yum/grid/testing/rhel/6Workstation/x86_64</url>
+      <signed>yes</signed>
+      <persisted>True</persisted>
+    </repository>
+    <repository name='epel'>
+      <url>http://download.fedoraproject.org/pub/epel/6/x86_64</url>
+      <signed>yes</signed>
+      <persisted>True</persisted>
+    </repository>  
+  </repositories>
+
+  <packages>
+    <package name='bind-utils'/>
+    <package name='curl'/>
+    <package name='dhclient'/>
+    <package name='lsof'/>
+    <package name='ntp'/>
+    <package name='openssh-clients'/>
+    <package name='openssh-server'/>
+    <package name='subversion'/>
+    <package name='telnet'/>
+    <package name='vim-enhanced'/>
+    <package name='wget'/>
+    <package name='yum'/>    
+  </packages>
+  
+    <files>
+       <file name='/root/.ssh/authorized_keys'>ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAyNVVQHhzAoTTE8yfeU8tRMqOQ6MNt6Qz+xJgUj40bVKsRX06Ji9CpGsTB4c0vaEicguQ/awiMpc355CEsfBh1xPzkjh7kzsKzTXsj7dTBroIgwrxrKOHQDVEe2TAh++ebhvfn641LBRHov4j/dk6a9F9YqQVW0H4JdT8fmTFf5GYwI3usNiqCxxRmgmOUPl9/X9E/6A7hCnX4Ma5quu06KHgcrdxBUh1bwMx2ebgQ+haNT1ExSkARwrnsgzSkuLeI+1XUGtv8ZajP5JZrcDjEFlzYmFDy82PYgjgfGepUxC6lBgVOevhe6ZHqT/1V1qiAWvRslPH91Lc+7W88ETTeQ== caballer@rsec00.rhic.bnl.gov
+ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAIEAtsAkm5S+LjA2C3F7dR78cDqG2kBc6QFGt9L8KbjdX0jjqkJPIXHySzDYR7etp2XDrkpnAwWn6sRLoUrH2lnBLrI7yduNHXxGb0dxqnl+7QUjFSX7veIAjYfPx+EnTNUNmpMlebERsvKc8XJvRy8cf5afAmW8c4JciCFkDUxqSUM= hollowec@rsec00
+ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAIEAu3jvrT1MH5MEBgUOf3cLkwPtWmdFJmjEa0BATwOGx8hkjYUeVzYPys84WwQn4z9NQQqcQeSphmyGOp5ngSCHBtFQ0J4WpDX1h4iiBsy4Uj0Oo/JTIcL9++Ru1/2WD6dAYiN5aR6rJr+Bp2WceSPoin3VLqBX2LAkvFOAQdgPCSE= jd@destefano.rhic.bnl.gov
+ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA4qnUbnuRSwG1Y+WO8Jb7qRDH7AdcyJFxqSexRW9pQ8sA8ZriZLR4NvMKTVtnFjEJ1hVPmVB2pNB4iREHZNqZ7E3POMT+81YxCnOcfTACmFxCSwN+IhaRUk93AdStDsM/+vPsShFii7eUU6x4Ykz5zdfBdL9FbV0VZyBVE8owcJiJpDGFRNTczmYVFlvQGZYSXhpnXwWb/N6kofvdyCHzwVJtiSnjaGxaD4SmSkfT/51g65KqN4TdEDhpl/3elqQB2Qhk8ilw960EcUM+ZwFmHQRQCLy7G7dUYnKJZoXhVN6L3GT0hB2OFJToO2YxnM7Lpnid8bWYPSyssUl+eFgATw== jhover@dh05.s80.bnl.gov
+ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAxhwyylQwyVDpGQb6QydXC2ajFk++I+9e0isVv7c1s6xs6WWEkL/e8Uu9MNps+K9RF3q4MiEVZFoVOl5DLc/1kaRtKu1FXFjgviYp0Toeey02nu9M4gMjByIHc1t9nfregejPmoC7UW1xDFMFCwOGLSlDVssnVf33JPr+0LIG4EplWgtANR5x/M0tO80QELDHOMfvAufEInUzOmq9TkmfiIHFNFEFM1VgT597zsiVNhC/rSt7ciyu+1tGOS1IVTTnk9CzGsU18ufr5e8FVpvhniFJLgySjPWY8JqvgvO6JWbvytAJmw4dxcsxZzg3MCx2y1AooLKn8PKYxndCH6n9zw== pryor@rsec00.rhic.bnl.gov
+ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAIEAwAjKmHFuBgsaJPuVEUJ+RsC6MH5jfbeB1ol8YwQR+TwhP3BN4HQO4X5tVzgyWjIadlBCnJ/JY+RQ6/JPSfsjshE2vk4GJReKUvWQgHXLiVXHDV7ZCfc1BcCw+M0GzDXRjxKCYx6pGXR/c4u0dCvsE7iuUoK+2l7OBBahocsADtc= tomw@icarus.rhic.bnl.gov
+ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA77oXUwZMSUPLws5iR2JU+gNZifEUE134hsTbDDapHXwhX51M6PIYeYS/19Xy8doLEJDWyY6Mbrpj73i40BE8Hd6wi9qEGRW8n+CJqzAn/ovKWAtyQ+Gd5Ikb1O9zmlnCCYL/+1Rul/BRwZs2g6eYcpVV8+g7SpQnBLzElNQ+MgYdmLBtjxuuVHDbZ6PUNAi8CXwyOt05buarZH2ZYtvud6t3rdI117ChiypDW3A1oj4eUzfWNRkKRQWa4J+BMrMpDEcP4E15q5OETu7O8+w5RdctnU691sh7qQOkNe6WAWtepft/FQL6jhpXy3UMbbouXL8q1qbK1VN9bdokUbXLEQ== willsk@rsec00.rhic.bnl.gov
+ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAIEAzgZHsVndNrrH/BpyUTBGw/fwrSugwQu2NRhh2RDMn/3gYHrzmhI0E9PLtHQp1+4y90KI0SQVBaEkPQxtavyx2YilxG4pKRKMPDRZ8k/ZZWj+NqbJj0uwPcl8UBP8PWUfJaZDKLcv0e97gBUWGTaa5713Mq4YuPrR7EyO/rkVxMU= xinzhao@rsec00
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCwa8TOg9p+/df3QbdyVtfT/nb/AUoOHJQxJRBGa1RilSpq94jt4QRwEt6QzIbraFjb0tjLJvqEl3L4Qx8bfQPISwULKUBje7jCCCbcz9sZtgwGu1nCJkhJREktF+o8hko3Iqz5ep7o2NCWFZ8NftoPTJ4aOhY5nzRjE85P3qX5bgIaO5GfZPqi6ezAq6Na2gjbnM1KPVgtwoYe/O/4E0w21VVEsZNJ86aaCyALp99js0QrzCojDxwFDidCLJnUq34QGKchdTjBRAjAUljVkwAWc4mPwngPk90HRCMoQuRDeHNRzwOlzsOMcbbJjYXD7GOs+YMUeWmOyQzDPSP2Grk/ alezayt@az.racf.bnl.gov
+ssh-dss AAAAB3NzaC1kc3MAAACBANbN2uHa0qBny+KyEXsONLGfL0ApmjBlwUTFzmPBujTqxd0hC/e66wGJMvGmgAcONrNqGbnLlkDGfEoVSxcUtwtdz6y1IQmv+QePe+oO3JsER3BJYsGW6rVWgHmiqgE5JN25PqwPLcxQ1blIlEqhGAZWObuQ3+J+LB+L05SKx2upAAAAFQCismlz9yAk5EQqG2FVEG3HN4sC5wAAAIBkET1hx27nk+RlrpZ6G9CEAoP21Pfb2YVp5TBeTyPm14i/UyPehgyoAkM852+04vpofNh+QYPT7DixIvRCONsYzC6vtx3R6GGmp0jNJ/VxhBBlo2nfa8Hb4QfjVdkQjAr15W+OLNizIocXqe2jVqX0BVyOJFVRWS+Wv3IWIQUTOgAAAIAuiA9STjv7EawR1HNsHZOBSeVxzs7+A3lJLUj507Y4Qshi1V319IJeAsGTxsqXtZmCCoJo9MWfW99WERV/qrcMGFuFd2N4nHWbV+cUPyVxIyK+oxa1+lzMlDxPVr/zjsx5eNVMd/Zd2wavHZbt+uEgxv/teDJs82rz1zZsoU8wBg== hiroito@acas0001.usatlas.bnl.gov
+</file>
+      
+      <file name='/etc/sshd_config'>
+Protocol 2
+SyslogFacility AUTHPRIV
+PermitRootLogin yes
+RSAAuthentication yes
+PubkeyAuthentication yes
+AuthorizedKeysFile	.ssh/authorized_keys
+PasswordAuthentication no
+ChallengeResponseAuthentication no
+GSSAPIAuthentication yes
+GSSAPICleanupCredentials yes
+UsePAM yes
+AcceptEnv LANG LANGUAGE LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES 
+AcceptEnv LC_PAPER LC_NAME LC_ADDRESS LC_TELEPHONE LC_MEASUREMENT 
+AcceptEnv LC_IDENTIFICATION LC_ALL
+Subsystem	sftp	/usr/libexec/openssh/sftp-server
+UseDNS no
+</file>
+
+  
+</template>

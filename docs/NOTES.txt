@@ -1,0 +1,36 @@
+SYSTEM DESIGN 
+
+Input:
+  
+  .tdl snippets that get combined into base_image TDLs. 
+    
+
+
+COMMANDS
+
+imagefactory --verbose target_image --template sl6.4.minimal.tdl openstack-kvm
+
+imagefactory --verbose target_image --template sl6.4.minimal.tdl openstack-kvm
+
+imagefactory --verbose provider_image --id 53d5da1e-f5d9-492a-8d7e-04be947aab4d openstack-kvm /etc/imagefactory/openstack-glance.json /etc/imagefactory/openstack-keystone.xml
+
+glance image-create --name ifsl64one --disk-format qcow2 --container-format bare --file /home/imagefactory/lib/storage/45e7664b-0486-4569-a915-1bf2583094e3.body --is-public False
+
+euca-describe-images
+
+
+
+
+
+
+
+
+OSG SYSTEM CONSIDERATIONS
+
+-- vo admins need to be able to create and test images on non-cloud platforms (e.g. direct kvm)
+  -- therefore the config system needs to allow for sensible defaults to be baked in before deployment.  
+    
+-- at large scale you do not want VMs booting and performing package installation or complex configuration. you want the node type to already be determined, and only critical info (condor CM, condor shared password, http proxy host) passed through via userdata. 
+
+
+-- OSG wants to support standard images (a la CERNVM) whic can be pointed to by URL in a job.  

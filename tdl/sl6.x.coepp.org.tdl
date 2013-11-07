@@ -1,0 +1,169 @@
+<template>
+  <name>sl6x_x86_64</name>
+  <description>Scientific Linux 6X x86_64 Image Template</description>
+
+  <os>
+    <name>ScientificLinux-6</name>
+    <version>3</version>
+    <arch>x86_64</arch>
+    <rootpw>put_a_password_here_but_remember_to_remove_it_using_a_command_below_if_you_wish</rootpw>
+    <install type='url'>
+      <url>http://ftp.scientificlinux.org/linux/scientific/6x/x86_64/os/</url>
+    </install>
+    <!-- You can also install OS from a pre-downloaded local file if you wish.
+    <install type='iso'>
+      <iso>file:////opt/images/SL-64-x86_64-2013-03-18-Install-DVD.iso</iso>
+    </install>
+    -->
+  </os>
+
+  <repositories>
+    <!-- Put the repositories you wish to add into your guest OS image. -->
+    <!-- If you use OpenStack/EC2 cloud, you have an alternative of using user-data script
+         to include repositories during VM boot process as part of VM contextualisation. 
+         We prefer to make the changes to the VM image as little as possible so that the 
+         image can be reuse as much as we possibly can. Therefore we tend to use user-data
+         to introduce the variety and flexibility for VM contextualisation. You may employ
+         Puppet for automated service deployment and configuration management on VMs. -->
+    <repository name='epel-6'>
+      <url>http://download.fedoraproject.org/pub/epel/6/$basearch</url>
+      <signed>no</signed>
+    </repository>
+  </repositories>
+
+  <packages>
+    <!-- Put the package names you wish to install into your guest OS image. -->
+    <!-- This part can be done via user-data if you use OpenStack/EC2 cloud. 
+         We tend to not include any package into image but use user-data or Puppet
+         instead. See the explanation above in "repositories". -->
+    <package name='cvmfs'/>
+    <package name='cvmfs-auto-setup'/>
+    <package name='cvmfs-init-scripts'/>
+    <package name='cvmfs-keys'/>
+    <package name='puppet'/>
+  </packages>
+
+  <commands>
+    <!-- Put the system commands you wish to execute on your guest OS image. -->
+    <command name='configure-console'>
+      #### Configure console in order for nova console-log to work properly on SL 6.x ####
+      # Remove rhgb (redhat graphical boot) and quiet from /boot/grub/grub.conf
+      #   rhgb: sets a GUI mode booting screen with most of the information hidden
+      #   quiet: hides the majority of boot messages before rhgb starts
+      /bin/sed -i 's/ rhgb//g' /boot/grub/grub.conf
+      /bin/sed -i 's/ quiet//g' /boot/grub/grub.conf
+    </command>     
+
+    <command name='set-timezone'>
+      #### Set timezone to UTC ####
+      # This is mandatory for Puppet agent to work with our Puppet server. 
+      /bin/sed -i 's/^ZONE=.*$/ZONE="Etc\/UTC"/' /etc/sysconfig/clock
+      /usr/sbin/tzdata-update
+    </command>
+
+    <command name='disable-firewall'>
+      #### Turn off iptables service ####
+      # The cloud security groups or Puppet would take care of access control in our case
+      /sbin/chkconfig iptables off
+      /sbin/chkconfig ip6tables off
+    </command>
+
+    <command name='disable-autoupdate'>
+      #### Disable YUM autoupdate ####
+      # We don't want any system auto-update but use Puppet to manage package installation
+      # instead.
+      /bin/sed -i 's/^ENABLED=.*$/ENABLED="false"/' /etc/sysconfig/yum-autoupdate
+    </command>
+
+    <command name='clean-mac-address'>
+      #### Clean up hard-coded MAC address information ####
+      # This is mandatory for our VMs to have networking connection on OpenStack cloud.
+      /bin/sed -i '/^HWADDR/d' /etc/sysconfig/network-scripts/ifcfg-eth0
+      /bin/echo -n > /etc/udev/rules.d/70-persistent-net.rules
+      /bin/echo -n > /lib/udev/rules.d/75-persistent-net-generator.rules
+      # Make sure the device is started at system bootup
+      /bin/sed -i 's/^ONBOOT=.*$/ONBOOT=yes/' /etc/sysconfig/network-scripts/ifcfg-eth0
+    </command>
+
+    <command name='clean-root-password'>
+      #### Remove root user's password ####
+      # It's highly recommended to remove user' password from the image. But use ssh key 
+      # to access your VM on cloud instead. 
+      /usr/bin/passwd -d root
+    </command>
+
+    <command name='fetch-public-key'>    
+      #### Write a script into /etc/rc.local to fetch public key ####
+      # You can replace this part with cloud.init mechanism.
+      # Add code into /etc/rc.local file before the line "touch /var/lock/subsys/local"
+      # The code is to fetch the SSH public key and add it to the root account
+      /bin/sed -i '/^touch \/var\/lock\/subsys\/local/d' /etc/rc.d/rc.local
+      /bin/cat >> /etc/rc.d/rc.local &lt;&lt; EOF
+#------------------------------------------------------------------#
+#     Download SSH public key from Openstack Metadata service      #
+#------------------------------------------------------------------#
+ 
+# This code only runs ONCE at first boot 
+ 
+# Fetch public key from metadata service via HTTP
+ATTEMPTS=30
+FAILED=0
+while [ ! -f /root/.ssh/authorized_keys ] ; do
+    wget -O /tmp/openssh-key http://169.254.169.254/latest/meta-data/public-keys/0/openssh-key
+    if [ \$? -eq 0 ] &amp;&amp; [ -s /tmp/openssh-key ] ; then
+        if [ ! -d /root/.ssh ]; then
+            mkdir -p /root/.ssh
+            chmod 700 /root/.ssh
+        fi
+        cat /tmp/openssh-key >> /root/.ssh/authorized_keys
+        chmod 600 /root/.ssh/authorized_keys
+        restorecon /root/.ssh/authorized_keys
+        rm -f /tmp/openssh-key
+        echo "Successfully retrieved public key from instance metadata, AUTHORIZED KEYS:"
+        cat /root/.ssh/authorized_keys
+        break
+    else
+        FAILED=\$((\$FAILED + 1))
+        if [ \$FAILED -ge \$ATTEMPTS ] ; then
+            echo "Failed to retrieve public key from instance metadata after \$FAILED attempts, quitting..."
+            break
+        fi
+        echo "Could not retrieve public key from instance metadata (attempt #\$FAILED/\$ATTEMPTS), retrying in 2 seconds..."
+        sleep 2
+    fi
+done
+ 
+touch /var/lock/subsys/local
+EOF
+    </command>
+    <command name='fetch-user-data'>
+      #### Write a script into /etc/rc.local to process user data ####
+      # Add code into /etc/rc.local file before the line "touch /var/lock/subsys/local"
+      # The code is to fetch the user-data script and execute it as part of VM contextualisation.
+      /bin/sed -i '/^touch \/var\/lock\/subsys\/local/d' /etc/rc.d/rc.local
+      /bin/cat >> /etc/rc.d/rc.local &lt;&lt; EOF
+#------------------------------------------------------------------#
+#     Process user-data fetched from Openstack Metadata service    #
+#------------------------------------------------------------------#
+ 
+# This code runs EVERYTIME at every single boot 
+ 
+# Retrieve user data to a /tmp/user-data file
+wget -O /tmp/user-data http://169.254.169.254/latest/user-data
+if [ \$? -eq 0 ] &amp;&amp; [ -s /tmp/user-data ] ; then
+    # Check if user-data starts with shebang
+    if head -1 /tmp/user-data | egrep -q '^#!' ; then
+        # Run user-data
+        cat /tmp/user-data | bash
+        rm -f /tmp/user-data
+    fi
+fi
+ 
+touch /var/lock/subsys/local
+EOF
+    </command> 
+
+  </commands>
+
+</template>
+
