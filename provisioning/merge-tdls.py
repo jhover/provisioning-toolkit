@@ -1,7 +1,9 @@
 #!/bin/env python
 #
 
-import xml.dom.minidom
+#import xml.dom.minidom
+from xml.etree import ElementTree
+
 import sys
 
 def __parseopts(self):
@@ -18,15 +20,29 @@ John Hover <jhover@bnl.gov>
     options, args = parser.parse_args()
 
 
+
+def mergefiles(files):
+    first = None
+    for filename in files:
+        data = ElementTree.parse(filename).getroot()
+        if first is None:
+            first = data
+        else:
+            first.extend(data)
+    if first is not None:
+        print ElementTree.tostring(first)
+
+
 def main():
     print(sys.argv)
     files = sys.argv[1:]
     print(files)
-    for f in files:
-        fh = open(f)
-        output = fh.read()
-        print(output)
-        xmldoc = xml.dom.minidom.parseString(output).documentElement
+    mergefiles(files)
+    #for f in files:
+    #    fh = open(f)
+    #    output = fh.read()
+    #    print(output)
+    #    xmldoc = xml.dom.minidom.parseString(output).documentElement
     #nodelist = []
     #for c in listnodesfromxml(xmldoc, 'c') :
     #    node_dict = node2dict(c)
