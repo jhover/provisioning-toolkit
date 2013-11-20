@@ -40,7 +40,8 @@ def explorefiles(files):
         printelements(root)
         
 def printelements(elem, depth=0):
-    print("%s" % (" " * depth, elem.tag, elem.attrib))
+    indent = " " * depth
+    print("%s %s %s" % (indent, elem.tag, elem.attrib))
     for child in root:
         printelements(child, depth + 1)
 
