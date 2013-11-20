@@ -81,4 +81,5 @@ AcceptEnv LC_IDENTIFICATION LC_ALL
 Subsystem	sftp	/usr/libexec/openssh/sftp-server
 UseDNS no
 </file>
+</files>
 </template>
