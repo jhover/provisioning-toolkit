@@ -33,4 +33,4 @@ OSG SYSTEM CONSIDERATIONS
 -- at large scale you do not want VMs booting and performing package installation or complex configuration. you want the node type to already be determined, and only critical info (condor CM, condor shared password, http proxy host) passed through via userdata. 
 
 
--- OSG wants to support standard images (a la CERNVM) whic can be pointed to by URL in a job.  
+-- OSG wants to support standard images (a la CERNVM) which can be pointed to by URL in a job.  
