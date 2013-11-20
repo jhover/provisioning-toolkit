@@ -25,20 +25,34 @@ def mergefiles(files):
     first = None
     for filename in files:
         print("Processing file %s" % filename)
-        data = ElementTree.parse(filename).getroot()
+        root = ElementTree.parse(filename).getroot()
         if first is None:
-            first = data
+            first = root
         else:
-            first.extend(data)
+            first.extend(root)
     if first is not None:
         print ElementTree.tostring(first)
+    
+def explorefiles(files):
+    for filename in files:
+        print("Processing file %s" % filename)
+        root = ElementTree.parse(filename).getroot() 
+        printelements(root)
+        
+def printelements(elem, depth=0):
+    print("%s" % (" " * depth, elem.tag, elem.attrib))
+    for child in root:
+        printelements(child, depth + 1)
+
+    
 
 
 def main():
     print(sys.argv)
     files = sys.argv[1:]
     print(files)
-    mergefiles(files)
+    #mergefiles(files)
+    explorefiles(files)
     #for f in files:
     #    fh = open(f)
     #    output = fh.read()
