@@ -24,6 +24,7 @@ John Hover <jhover@bnl.gov>
 def mergefiles(files):
     first = None
     for filename in files:
+        print("Processing file %s" % filename)
         data = ElementTree.parse(filename).getroot()
         if first is None:
             first = data
