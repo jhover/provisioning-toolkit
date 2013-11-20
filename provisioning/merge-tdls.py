@@ -42,7 +42,7 @@ def explorefiles(files):
 def printelements(elem, depth=0):
     indent = " " * depth
     print("%s %s %s" % (indent, elem.tag, elem.attrib))
-    for child in root:
+    for child in elem:
         printelements(child, depth + 1)
 
     
