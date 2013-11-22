@@ -24,12 +24,13 @@ def explorefiles(files):
             doc = yaml.load(f)
             print(doc)
             filepairs = doc['files']
-            print("<files>")
+            print("<template>\n   <files>")
             
             for targetfile in filepairs.keys():
                 sourcefile = filepairs[targetfile]
                 filecontent = open(sourcefile).read()
-                print("  <file name=%s>%s</file>" % (targetfile,filecontent)) 
+                print("         <file name=%s>%s</file>" % (targetfile,filecontent)) 
+            print("  </files>\n</template>")
 
 def main():
     print(sys.argv)
