@@ -1,24 +1,23 @@
 #!/bin/env python
+# 
+# Program to merge imagefactory TDL (Template Description Language) XML files to allow
+# an inheritance tree. 
+# TDLs specified later on the command line with identical elements override TDLs earlier. 
+# Otherwise, content is merged. 
 #
-
 #import xml.dom.minidom
 from xml.etree import ElementTree
 
 import sys
 
 def __parseopts(self):
-    parser = OptionParser(usage='''%prog [OPTIONS]
+    parser = OptionParser(usage='''%prog [OPTIONS] FILE1 [ FILE2 FILE3 ]
 merge-tdls takes multiple TDLs and merges them, with later TDLs overriding earlier ones. 
 This program is licenced under the GPL, as set out in LICENSE file.
 Author(s):
 John Hover <jhover@bnl.gov>
 ''', version="1.0")
-    parser.add_option("--files", dest="files", 
-                          action="store", 
-                          metavar="FILES", 
-                          help="Files to merge.")
     options, args = parser.parse_args()
-
 
 
 def mergefiles(files):
@@ -29,9 +28,12 @@ def mergefiles(files):
         if first is None:
             first = root
         else:
-            first.extend(root)
-    if first is not None:
-        print ElementTree.tostring(first)
+            first.merge(root)
+
+def mergetree(first, second):
+    pass
+
+
     
 def explorefiles(files):
     for filename in files:
@@ -44,8 +46,6 @@ def printelements(elem, depth=0):
     print("%s %s %s" % (indent, elem.tag, elem.attrib))
     for child in elem:
         printelements(child, depth + 1)
-
-    
 
 
 def main():
