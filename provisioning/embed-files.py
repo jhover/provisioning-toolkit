@@ -14,15 +14,16 @@
 #      <file name='/path/to/file/filename2.txt'>Content of file 2</file>
 #    </files>
 #  <template>
-
+from __future__ import print_function
 import sys
 import yaml
+
 
 def explorefiles(files):
     for file in files:
         with open(file, 'r') as f:
             doc = yaml.load(f)
-            print(doc)
+            print(doc, file=sys.stderr)
             filepairs = doc['files']
             print("<template>\n   <files>")
             
@@ -33,9 +34,9 @@ def explorefiles(files):
             print("  </files>\n</template>")
 
 def main():
-    print(sys.argv)
+    print(sys.argv, file=sys.stderr)
     files = sys.argv[1:]
-    print(files)
+    print(files, file=sys.stderr)
     #mergefiles(files)
     explorefiles(files)
     #for f in files:
