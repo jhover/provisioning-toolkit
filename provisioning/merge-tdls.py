@@ -28,18 +28,40 @@ def mergefiles(files):
         if first is None:
             first = root
         else:
-            first.merge(root)
+            mergetree(first,root)
+    return first
 
 def mergetree(first, second):
-    pass
-
+    if first.tag != second.tag:
+        print("Tags not equivalent! Problem! %s != %s" % (first.tag, second.tag))
+    else:
+        print("Tags equal: %s == %s" % (first.tag, second.tag))
+    
+    firsttags = []
+    for firstchild in first:
+        firsttags.append(firstchild.tag)
+        for secondchild in second:
+            if secondchild.tag == firstchild.tag:
+                if not firstchild.attrib and not secondchild.attrib:
+                    mergetree(firstchild, secondchild)
+                else:
+                    print("Same tag has some attributes.. %s  %s" % (firstchild.attrib, secondchild.attrib) ) 
+    
+    for secondchild in second:
+        if secondchild.tag not in firsttags:
+            first.append(secondchild)
+            print("Adding missing child %s to first"% secondchild)
 
     
 def explorefiles(files):
     for filename in files:
-        print("Processing file %s" % filename)
+        print("Processing file %s ***********************************" % filename)
         root = ElementTree.parse(filename).getroot() 
         printelements(root)
+    print("Merging files ***********************************" % files)
+    merged = mergefiles(files)
+    print("Printing merged structure ***********************************")
+    printelements(merged)
         
 def printelements(elem, depth=0):
     indent = "  " * depth
@@ -54,6 +76,7 @@ def main():
     print(files)
     #mergefiles(files)
     explorefiles(files)
+    
     #for f in files:
     #    fh = open(f)
     #    output = fh.read()
