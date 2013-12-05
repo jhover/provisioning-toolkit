@@ -36,7 +36,6 @@
   </repositories>
 
   <packages>
-    <package name='openssh-clients'/>
     <package name='subversion'/>
     <package name='vim-enhanced'/>
     <package name='openssh-server'/>

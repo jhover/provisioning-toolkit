@@ -3,7 +3,7 @@ Provisioning Toolkit
 
 This project is intended to bring together a general-purpose set of utilities and practices for creating and managing virtual machines resources. 
 
-Overview
+OVERVIEW
 
 -- Scripts to embed file contents into TDLs
 
@@ -21,4 +21,9 @@ Overview
 -- Puppet to handle run-time configuration adjustment. 
 
   
+  
+VM CREATION
+
+profile 1    +    profile 2   +   profile 3
+ files+TDL         files+TDL       files+TDL
  

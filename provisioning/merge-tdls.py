@@ -37,6 +37,9 @@ def mergetree(first, second):
     else:
         print("Tags equal: %s == %s" % (first.tag, second.tag))
     
+    firstattribindex = {}
+    secondattribindex = {}
+    
     firsttags = []
     for firstchild in first:
         firsttags.append(firstchild.tag)
@@ -45,7 +48,10 @@ def mergetree(first, second):
                 if not firstchild.attrib and not secondchild.attrib:
                     mergetree(firstchild, secondchild)
                 else:
-                    print("Same tag has some attributes.. %s  %s" % (firstchild.attrib, secondchild.attrib) ) 
+                    pass
+    
+    
+       
     
     for secondchild in second:
         if secondchild.tag not in firsttags:
