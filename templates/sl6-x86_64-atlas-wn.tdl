@@ -36,18 +36,12 @@
   </repositories>
 
   <packages>
-    <package name='bind-utils'/>
-    <package name='curl'/>
-    <package name='dhclient'/>
-    <package name='lsof'/>
-    <package name='ntp'/>
     <package name='openssh-clients'/>
-    <package name='openssh-server'/>
     <package name='subversion'/>
-    <package name='telnet'/>
     <package name='vim-enhanced'/>
+    <package name='openssh-server'/>
     <package name='wget'/>
-    <package name='yum'/>    
+    <package name='curl'/>
   </packages>
   
     <files>

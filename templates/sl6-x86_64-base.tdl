@@ -10,4 +10,15 @@
     </install>
   </os>
   <description>SL 6 - Basic Install</description>
+
+<packages>
+    <package name='yum'/>
+    <package name='bind-utils'/>
+    <package name='telnet'/>
+    <package name='dhclient'/>
+    <package name='lsof'/>
+    <package name='ntp'/>
+    <package name='openssh-clients'/>
+</packages>
+
 </template>
