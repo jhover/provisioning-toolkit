@@ -80,7 +80,7 @@ def cmpnodes(first, second):
 
 
 def sortattrib(attribhash):
-        
+    pass
 
   
     
