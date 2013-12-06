@@ -46,18 +46,43 @@ def mergetree(first, second):
         for secondchild in second:
             if secondchild.tag == firstchild.tag:
                 if not firstchild.attrib and not secondchild.attrib:
+                    # for attribute-less elements, we can simple descend
                     mergetree(firstchild, secondchild)
                 else:
-                    pass
-    
-    
+                    # for elements with same tags, but having attibutes, we need to 
+                    # handle them more carefully,since there may be multiple children with the same tag 
+                    # e.g. 'package' but different attributes, e.g. 'name' = 'yum' 
+                    pass        
        
-    
+    # add completely missing children   
     for secondchild in second:
         if secondchild.tag not in firsttags:
             first.append(secondchild)
             print("Adding missing child %s to first"% secondchild)
 
+
+def cmpnodes(first, second):
+    # compares tags, attributes, data (.text) 
+    # Two nodes are the same if all are the same. 
+    #
+    print("Comparing nodes %s and %s" % (first,second))
+    if first.tag != second.tag:
+        print("Tag %s != %s" % (first.tag, second.tag) )
+        return cmp(first.tag, second.tag)
+    if first.text != second.text:
+        print("Text %s != %s" % (first.tag, second.tag) )
+        return cmp(first.text,second.text)
+    
+    fa = first.attrib
+    sa = second.attrib
+    if cmp(fa,sa) != 0:
+        same = False
+
+
+def sortattrib(attribhash):
+        
+
+  
     
 def explorefiles(files):
     for filename in files:
