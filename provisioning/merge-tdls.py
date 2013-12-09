@@ -7,26 +7,15 @@
 #
 from xml.etree import ElementTree
 
-import sys
+import getopt
 import logging
-
-
-
-def __parseopts(self):
-    parser = OptionParser(usage='''%prog [OPTIONS] FILE1 [ FILE2 FILE3 ]
-merge-tdls takes multiple TDLs and merges them, with later TDLs overriding earlier ones. 
-This program is licenced under the GPL, as set out in LICENSE file.
-Author(s):
-John Hover <jhover@bnl.gov>
-''', version="1.0")
-    options, args = parser.parse_args()
-
+import sys
 
 def mergefiles(files):
     first = None
     tree = None
     for filename in files:
-        print("Processing file %s" % filename)
+        log.debug("Processing file %s" % filename)
         if first is None:
             tree = ElementTree.parse(filename)
             root = tree.getroot()
@@ -38,9 +27,9 @@ def mergefiles(files):
 
 def mergetree(first, second):
     if first.tag != second.tag:
-        print("Tags not equivalent! Problem! %s != %s" % (first.tag, second.tag))
+        log.debug("Tags not equivalent! Problem! %s != %s" % (first.tag, second.tag))
     else:
-        print("Tags equal: %s == %s" % (first.tag, second.tag))
+        log.debug("Tags equal: %s == %s" % (first.tag, second.tag))
         if first.text != second.text:
             first.text = second.text
 
@@ -80,7 +69,7 @@ def mergetree(first, second):
     # add completely missing children   
     for secondchild in second:
         if secondchild.tag not in firsttags:
-            print("Adding missing child %s to first"% secondchild)
+            log.debug("Adding missing child %s to first"% secondchild)
             first.append(secondchild)
     
 
@@ -102,10 +91,6 @@ def cmp_elements(a,b):
         return -1
     elif a.tag > b.tag:
         return 1
-    #elif a.tail < b.tail:
-    #    return -1
-    #elif a.tail > b.tail:
-    #    return 1
 
     #compare attributes
     aitems = a.attrib.items()
@@ -129,45 +114,118 @@ def cmp_elements(a,b):
             return -1
         elif cmpval > 0:
             return 1    
-
     #must be equal 
     return 0
 
-
-
-def sortattrib(attribhash):
-    pass
-
-  
     
 def handlefiles(files):
     for filename in files:
-        print("Processing file %s ***********************************" % filename)
+        log.debug("Processing file %s ***********************************" % filename)
         root = ElementTree.parse(filename).getroot() 
         printelements(root)
-    print("Merging files ***********************************" % files)
+    log.debug("Merging files ***********************************" % files)
     merged = mergefiles(files)
-    print("Printing merged structure ***********************************")
+    log.debug("Printing merged structure ***********************************")
     printelements(merged.getroot())
-    print(merged)
-    merged.write(sys.stdout)
+    log.debug(merged)
+    merged.write(outfile)
         
 def printelements(elem, depth=0):
     indent = "   " * depth
     if elem.text != None and elem.text.strip() != '':
-        print("%s %s %s: '%s'" % (indent, elem.tag, elem.attrib, elem.text.strip()))
+        log.debug("%s %s %s: '%s'" % (indent, elem.tag, elem.attrib, elem.text.strip()))
     else:
-        print("%s %s %s" % (indent, elem.tag, elem.attrib))
+        log.debug("%s %s %s" % (indent, elem.tag, elem.attrib))
     for child in elem:
         printelements(child, depth + 1)
 
-
 def main():
-    print(sys.argv)
+    
+    global log
+    global outfile
+    
+    debug = 0
+    info = 1
+    warn = 0
+    logfile = None
+    outfile = sys.stdout
+    
+    usage = """Usage: merge-tdls.py [OPTIONS] FILE1  FILE2 [ FILE3 ] 
+   merge-tdls takes multiple TDLs and merges them, with later TDLs overriding earlier ones. 
+   OPTIONS: 
+        -h --help                   Print this message
+        -d --debug                  Debug messages
+        -V --version                Print program version and exit.
+        -o --outfile                STDOUT
+     """
+
+    # Handle command line options
+    argv = sys.argv[1:]
+    try:
+        opts, args = getopt.getopt(argv, 
+                                   "hdvo:", 
+                                   ["help", 
+                                    "debug", 
+                                    "verbose",
+                                    "outfile",
+                                    ])
+    except getopt.GetoptError, error:
+        print( str(error))
+        print( usage )                          
+        sys.exit(1)
+    for opt, arg in opts:
+        if opt in ("-h", "--help"):
+            print(usage)                     
+            sys.exit()            
+        elif opt in ("-d", "--debug"):
+            debug = 1
+        elif opt in ("-v", "--verbose"):
+            info = 1
+        elif opt in ("-L","--logfile"):
+            logfile = arg
+        elif opt in ("-o","--outfile"):
+            outfile = arg
+    
+    major, minor, release, st, num = sys.version_info
+    FORMAT24="[ %(levelname)s ] %(asctime)s %(filename)s (Line %(lineno)d): %(message)s"
+    FORMAT25="[%(levelname)s] %(asctime)s %(module)s.%(funcName)s(): %(message)s"
+    FORMAT26=FORMAT25
+    FORMAT27=FORMAT26
+    
+    if major == 2:
+        if minor == 4:
+            formatstr = FORMAT24
+        elif minor == 5:
+            formatstr = FORMAT25
+        elif minor == 6:
+            formatstr = FORMAT26
+        elif minor == 7:
+            formatstr = FORMAT27
+            
+    log = logging.getLogger()
+    hdlr = logging.StreamHandler(sys.stdout)
+    formatter = logging.Formatter(formatstr)
+    hdlr.setFormatter(formatter)
+    log.addHandler(hdlr)
+    # Handle file-based logging.
+    if logfile:
+        hdlr = logging.FileHandler(logfile)
+        hdlr.setFormatter(formatter)
+        log.addHandler(hdlr)
+
+    if warn:
+        log.setLevel(logging.WARN)
+    if debug: 
+        log.setLevel(logging.DEBUG) # Override with command line switches
+    if info:
+        log.setLevel(logging.INFO) # Override with command line switches
+
+
+    log.debug("%s" %sys.argv)
     files = sys.argv[1:]
-    print(files)
+    log.debug(files)
     handlefiles(files)
-   
+
 
 
 if __name__ == "__main__":
