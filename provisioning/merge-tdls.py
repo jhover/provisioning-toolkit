@@ -11,6 +11,8 @@ import getopt
 import logging
 import sys
 
+    
+
 def mergefiles(files):
     first = None
     tree = None
@@ -118,6 +120,16 @@ def cmp_elements(a,b):
     return 0
 
     
+def printelements(elem, depth=0):
+    indent = "   " * depth
+    if elem.text != None and elem.text.strip() != '':
+        log.debug("%s %s %s: '%s'" % (indent, elem.tag, elem.attrib, elem.text.strip()))
+    else:
+        log.debug("%s %s %s" % (indent, elem.tag, elem.attrib))
+    for child in elem:
+        printelements(child, depth + 1)
+
+
 def handlefiles(files):
     for filename in files:
         log.debug("Processing file %s ***********************************" % filename)
@@ -128,22 +140,18 @@ def handlefiles(files):
     log.debug("Printing merged structure ***********************************")
     printelements(merged.getroot())
     log.debug(merged)
-    merged.write(outfile)
-        
-def printelements(elem, depth=0):
-    indent = "   " * depth
-    if elem.text != None and elem.text.strip() != '':
-        log.debug("%s %s %s: '%s'" % (indent, elem.tag, elem.attrib, elem.text.strip()))
+    if outfile != sys.stdout:
+        f = open(outfile)
+        merged.write(f)
     else:
-        log.debug("%s %s %s" % (indent, elem.tag, elem.attrib))
-    for child in elem:
-        printelements(child, depth + 1)
+        merged.write(sys.stdout)
+
 
 def main():
     
     global log
     global outfile
-    
+        
     debug = 0
     info = 1
     warn = 0
@@ -228,5 +236,5 @@ def main():
 
 
 
-if __name__ == "__main__":
+if __name__ == "__main__": 
     main()
