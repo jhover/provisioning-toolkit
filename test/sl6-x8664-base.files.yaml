@@ -1,0 +1,8 @@
+files:
+  "/root/.ssh/authorized_keys": "test/files/ssh/authorized_keys"
+  "/etc/ssh/sshd_config"   : "test/files/ssh/sshd_config"
+  "/etc/rc.d/rc.local" : "test/files/etc/rc.local"      
+  "/etc/ntp/step-tickers" : "test/files/etc/step-tickers"
+  "/etc/sysconfig/selinux" : "test/files/etc/selinux"
+  "/etc/profile.d/proxy.sh" : "test/files/etc/profile.d/proxy.sh"
+  "/etc/security/limits.d/80-limits.conf" : "test/files/etc/limits.conf"
