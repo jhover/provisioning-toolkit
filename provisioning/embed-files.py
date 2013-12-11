@@ -19,30 +19,50 @@ import sys
 import yaml
 import getopt
 import logging
+import os
 
-def handlefiles(files, fileroot = None ):
-    print("<template>\n   <files>")
+def handlefiles(files, outfile= sys.stdout , fileroot = None ):   
+    if outfile != sys.stdout:
+        of = open(outfile, 'w')
+    else:
+        of = sys.stdout
+    
+    of.write("<template>\n   <files>\n")
     for file in files:
         with open(file, 'r') as f:
             doc = yaml.load(f)
-            print(doc, file=sys.stderr)
             filepairs = doc['files']                
             for targetfile in filepairs.keys():
                 sourcefile = filepairs[targetfile]
-                if not fileroot:
-                    filecontent = open(sourcefile).read()
-                print("         <file name=%s>%s</file>" % (targetfile,filecontent)) 
-    print("  </files>\n</template>")
+                if fileroot:
+                    sourcefile = "%s/%s" % (fileroot, sourcefile)
+                    log.debug("sourcefile path is %s" % sourcefile)
+                filecontent = open(sourcefile).read()
+                of.write("         <file name=%s>%s</file>\n" % (targetfile,filecontent)) 
+    of.write("  </files>\n</template>")
+    of.close()
+
+def ensurefile(filepath, clear = False):
+    filepath = os.path.expandvars(filepath)
+    filepath = os.path.expanduser(filepath)
+    d = os.path.dirname(filepath)
+    if not os.path.exists(d):
+        os.makedirs(d)
+    if not os.path.exists(filepath):
+        open(filepath, 'w').close()
+    elif clear:
+        open(filepath, 'w').close()
+
+
 
 def main():
       
     global log
-    global outfile
-        
+            
     debug = 0
     info = 1
     warn = 0
-    logfile = None
+    logfile = sys.stderr
     outfile = sys.stdout
     fileroot = None
     
@@ -55,18 +75,20 @@ def main():
         -V --version                Print program version and exit.
         -r --fileroot               <working directory>
         -o --outfile                STDOUT
+        -L --logfile                STDERR
      """
 
     # Handle command line options
     argv = sys.argv[1:]
     try:
         opts, args = getopt.getopt(argv, 
-                                   "hdvr:o:", 
+                                   "hdvL:r:o:", 
                                    ["help", 
                                     "debug", 
                                     "verbose",
-                                    "fileroot",
-                                    "outfile",
+                                    "logfile=",
+                                    "fileroot=",
+                                    "outfile=",
                                     ])
     except getopt.GetoptError, error:
         print( str(error))
@@ -84,7 +106,7 @@ def main():
             logfile = arg
         elif opt in ("-o","--outfile"):
             outfile = arg
-        elif opt in ("-r", --"fileroot"):
+        elif opt in ("-r", "--fileroot"):
             fileroot = arg
     
     major, minor, release, st, num = sys.version_info
@@ -109,22 +131,30 @@ def main():
     hdlr.setFormatter(formatter)
     log.addHandler(hdlr)
     # Handle file-based logging.
-    if logfile:
+    if logfile != sys.stderr:
+        ensurefile(logfile)        
         hdlr = logging.FileHandler(logfile)
         hdlr.setFormatter(formatter)
         log.addHandler(hdlr)
 
     if warn:
+        info = 0 
         log.setLevel(logging.WARN)
-    if debug: 
+    if debug:
+        info = 0 
         log.setLevel(logging.DEBUG) # Override with command line switches
     if info:
         log.setLevel(logging.INFO) # Override with command line switches
 
     log.debug("%s" %sys.argv)
-    files = sys.argv[1:]
+    files = args
     log.debug(files)
-    handlefiles(files)
+    log.info("Handling files with Logfile=%s Outfile=%s and Fileroot=%s" % (logfile, outfile, fileroot))    
+    
+    if files:
+        if outfile != sys.stderr:
+            ensurefile(outfile, clear=True)
+        handlefiles(files, outfile, fileroot )
 
 
 if __name__ == "__main__":

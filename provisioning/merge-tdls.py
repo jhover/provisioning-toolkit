@@ -175,7 +175,7 @@ def main():
                                    ["help", 
                                     "debug", 
                                     "verbose",
-                                    "outfile",
+                                    "outfile=",
                                     ])
     except getopt.GetoptError, error:
         print( str(error))
