@@ -5,12 +5,9 @@
 import sys
 from distutils.core import setup
 
-from certify import core
-release_version=core.__version__
-
 setup(
     name="provisioning-toolkit",
-    version=release_version,
+    version='0.9.0',
     description='Utilities for automating VM management.',
     long_description='''Utilities for automating VM management.''',
     license='GPL',
@@ -28,16 +25,6 @@ setup(
           'Programming Language :: Python',
           'Topic :: System Administration :: Management',
     ],
-    scripts=[ 'scripts/certify',
-             ],
-    data_files=[ ('share/certify', 
-                      ['README.txt',
-                       'NOTES.txt',            
-                       'LGPL.txt',
-                        ]
-                  ),
-                  ('share/certify/config', ['config/certify.conf','config/hosts.conf']              
-                   ),
-               ]
+    data_files=[ ('share/provisioning', ['README.txt', 'LGPL.txt', ] ) ],
 )
 

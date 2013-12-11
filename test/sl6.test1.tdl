@@ -1,0 +1,42 @@
+<template>
+  <name>sl6x_x86_64</name>
+  <description>Scientific Linux 6X x86_64 Image Template</description>
+
+  <os>
+    <name>ScientificLinux-6</name>
+    <version>3</version>
+    <arch>x86_64</arch>
+    <rootpw>put_a_password_here_but_remember_to_remove_it_using_a_command_below_if_you_wish</rootpw>
+    <install type='url'>
+      <url>http://ftp.scientificlinux.org/linux/scientific/6x/x86_64/os/</url>
+    </install>
+  </os>
+
+  <repositories>
+    <repository name='epel-6'>
+      <url>http://download.fedoraproject.org/pub/epel/6/$basearch</url>
+      <signed>no</signed>
+    </repository>
+  </repositories>
+
+  <packages>
+    <package name='cvmfs'/>
+    <package name='cvmfs-auto-setup'/>
+    <package name='cvmfs-init-scripts'/>
+    <package name='cvmfs-keys'/>
+  </packages>
+
+  <commands>
+    <command name='configure-console'>
+      /bin/sed -i 's/ rhgb//g' /boot/grub/grub.conf
+      /bin/sed -i 's/ quiet//g' /boot/grub/grub.conf
+    </command>     
+
+    <command name='set-timezone'>
+      /bin/sed -i 's/^ZONE=.*$/ZONE="Etc\/UTC"/' /etc/sysconfig/clock
+      /usr/sbin/tzdata-update
+    </command>
+  </commands>
+
+</template>
+

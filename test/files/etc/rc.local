@@ -1,0 +1,30 @@
+#!/bin/bash
+#
+# Give this host a random hostname if it doesn't get something
+# unique from DHCP. 
+#
+
+SN=`hostname --short`
+if [ "${SN}x" == "localhostx" ] ; then
+   hostname $RANDOM.localdomain
+fi
+
+# Set external DNS names for BNL servers...
+#
+# As of 12/2012 should not be necessary at BNL
+#
+#HOSTS=/etc/hosts
+#if [[ -n $(grep "lfc.usatlas.bnl.gov" $HOSTS) ]] ; then
+#   : # do nothing
+#else
+#   echo "192.12.15.30   lfc.usatlas.bnl.gov" >> $HOSTS
+#fi
+#
+#if [[ -n $(grep "dcsrm.usatlas.bnl.gov" $HOSTS) ]] ; then
+#   : # do nothing
+#else
+#   echo "192.12.15.2   dcsrm.usatlas.bnl.gov" >> $HOSTS
+#fi
+
+touch /var/lock/subsys/local
+
