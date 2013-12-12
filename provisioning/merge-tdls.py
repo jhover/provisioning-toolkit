@@ -152,8 +152,9 @@ def handlefiles(files, outfile= sys.stdout ):
     printelements(merged.getroot())
     log.debug(merged)
     if outfile != sys.stdout:
-        outfile = open(outfile)
+        outfile = open(outfile, 'w')
     merged.write(outfile)
+    outfile.close()
 
 
 def main():
