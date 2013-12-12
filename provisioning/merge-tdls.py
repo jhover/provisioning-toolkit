@@ -9,6 +9,7 @@ from xml.etree import ElementTree
 
 import getopt
 import logging
+import os
 import sys
 
 def ensurefile(filepath, clear = False):

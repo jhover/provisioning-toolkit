@@ -15,11 +15,11 @@
 #    </files>
 #  <template>
 from __future__ import print_function
-import sys
-import yaml
 import getopt
 import logging
 import os
+import sys
+import yaml
 
 def handlefiles(files, outfile= sys.stdout , fileroot = None ):   
     if outfile != sys.stdout:
