@@ -141,7 +141,7 @@ def printelements(elem, depth=0):
         printelements(child, depth + 1)
 
 
-def handlefiles(files, outfile= sys.stdout , fileroot = None):
+def handlefiles(files, outfile= sys.stdout ):
     for filename in files:
         log.debug("Processing file %s ***********************************" % filename)
         root = ElementTree.parse(filename).getroot() 
@@ -248,7 +248,7 @@ def main():
     if files:
         if outfile != sys.stdout:
             ensurefile(outfile, clear=True)
-        handlefiles(files, outfile, fileroot )
+        handlefiles(files, outfile )
 
 
 if __name__ == "__main__": 
