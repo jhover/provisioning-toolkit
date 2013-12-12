@@ -7,7 +7,7 @@ from distutils.core import setup
 
 setup(
     name="provisioning-toolkit",
-    version='0.9.0',
+    version='0.9.1',
     description='Utilities for automating VM management.',
     long_description='''Utilities for automating VM management.''',
     license='GPL',
@@ -25,6 +25,9 @@ setup(
           'Programming Language :: Python',
           'Topic :: System Administration :: Management',
     ],
+    scripts=[ 'bin/merge-tdls',
+              'bin/embed-files',
+             ],
     data_files=[ ('share/provisioning', ['README.txt', 'LGPL.txt', ] ) ],
 )
 
