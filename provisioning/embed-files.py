@@ -38,7 +38,7 @@ def handlefiles(files, outfile= sys.stdout , fileroot = None ):
                     sourcefile = "%s/%s" % (fileroot, sourcefile)
                     log.debug("sourcefile path is %s" % sourcefile)
                 filecontent = open(sourcefile).read()
-                of.write("         <file name=%s>%s</file>\n" % (targetfile,filecontent)) 
+                of.write("         <file name='%s'>%s</file>\n" % (targetfile,filecontent)) 
     of.write("  </files>\n</template>")
     of.close()
 
