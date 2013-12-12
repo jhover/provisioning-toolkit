@@ -11,7 +11,17 @@ import getopt
 import logging
 import sys
 
-    
+def ensurefile(filepath, clear = False):
+    filepath = os.path.expandvars(filepath)
+    filepath = os.path.expanduser(filepath)
+    d = os.path.dirname(filepath)
+    if not os.path.exists(d):
+        os.makedirs(d)
+    if not os.path.exists(filepath):
+        open(filepath, 'w').close()
+    elif clear:
+        open(filepath, 'w').close()
+            
 
 def mergefiles(files):
     first = None
@@ -153,9 +163,9 @@ def main():
     global outfile
         
     debug = 0
-    info = 1
+    info = 0
     warn = 0
-    logfile = None
+    logfile = sys.stderr
     outfile = sys.stdout
     
     usage = """Usage: merge-tdls.py [OPTIONS] FILE1  FILE2 [ FILE3 ] 
@@ -163,18 +173,22 @@ def main():
    OPTIONS: 
         -h --help                   Print this message
         -d --debug                  Debug messages
+        -v --verbose                Verbose messages
+        -L --logfile                STDERR
         -V --version                Print program version and exit.
         -o --outfile                STDOUT
+        
      """
 
     # Handle command line options
     argv = sys.argv[1:]
     try:
         opts, args = getopt.getopt(argv, 
-                                   "hdvo:", 
+                                   "hdvL:o:", 
                                    ["help", 
                                     "debug", 
                                     "verbose",
+                                    "logfile=",
                                     "outfile=",
                                     ])
     except getopt.GetoptError, error:
@@ -216,7 +230,8 @@ def main():
     hdlr.setFormatter(formatter)
     log.addHandler(hdlr)
     # Handle file-based logging.
-    if logfile:
+    if logfile != sys.stderr:
+        ensurefile(logfile)        
         hdlr = logging.FileHandler(logfile)
         hdlr.setFormatter(formatter)
         log.addHandler(hdlr)
@@ -227,10 +242,16 @@ def main():
         log.setLevel(logging.DEBUG) # Override with command line switches
     if info:
         log.setLevel(logging.INFO) # Override with command line switches
-
-
+    
     log.debug("%s" %sys.argv)
-    files = sys.argv[1:]
+    files = args
+    log.debug(files)
+
+    if files:
+        if outfile != sys.stdout:
+            ensurefile(outfile, clear=True)
+        handlefiles(files, outfile, fileroot )
+
     log.debug(files)
     handlefiles(files)
 

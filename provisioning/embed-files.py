@@ -60,7 +60,7 @@ def main():
     global log
             
     debug = 0
-    info = 1
+    info = 0
     warn = 0
     logfile = sys.stderr
     outfile = sys.stdout
@@ -138,10 +138,8 @@ def main():
         log.addHandler(hdlr)
 
     if warn:
-        info = 0 
         log.setLevel(logging.WARN)
     if debug:
-        info = 0 
         log.setLevel(logging.DEBUG) # Override with command line switches
     if info:
         log.setLevel(logging.INFO) # Override with command line switches
