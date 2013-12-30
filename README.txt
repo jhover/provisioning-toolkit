@@ -60,14 +60,21 @@ Note target image id:
 
 fef23f6f-20c9-401a-852f-20a179b97ab0
 
+0144e595-13cb-40e1-b759-f631edc06c16
+
+
+Create and upload image in Openstack:
+. nova-essex/novarc
+
+ glance image-create --name sl6-x8664-if-base --disk-format raw --container-format bare --file /home/imagefactory/lib/storage/0144e595-13cb-40e1-b759-f631edc06c16.body --is-public False
+
+
+'glance image-list' to check
+
+'euca-describe-images' to get ami ID. 
+
+'euca-run-instance <ami-id>' to run. 
 
 
 
-
-
-Create image in Openstack:
- 
-glance image-create --id ifsl64one --name ifsl64one --disk-format qcow2 --container-format bare --file /home/imagefactory/lib/storage/45e7664b-0486-4569-a915-1bf2583094e3.body --is-public False
-
-glance image-create --name ifsl64one --disk-format qcow2 --container-format bare --file /home/imagefactory/lib/storage/45e7664b-0486-4569-a915-1bf2583094e3.body --is-public False
  
