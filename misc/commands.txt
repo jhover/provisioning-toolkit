@@ -1,0 +1,2 @@
+. /home/jhover/nova-essex/novarc
+glance  image-create --name sl6-x86_64-wn-atlas --is-public=False  --disk-format raw --container-format bare --owner bnlcloud < /home/jhover/image/sl6-x86_64-wn-atlas-sda.raw
