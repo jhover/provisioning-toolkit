@@ -92,8 +92,8 @@ def run_imagefactory(tdlfile):
     
 
 def nameext(filename):
-        ext = fn.split('.')[-1:]
-        name = '.'.join(fn.split('.')[:-1])
+        ext = filename.split('.')[-1:]
+        name = '.'.join(filename.split('.')[:-1])
         return(name, ext)
     
 
