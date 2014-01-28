@@ -28,21 +28,58 @@
 #    --container-format bare 
 #    --file /home/imagefactory/lib/storage/7260bef6-3409-4d22-8211-a4e91072d7c0.body 
 #    --is-public False
+#
+#  os.path.exists()
+#
+#  p = subprocess.Popen(querycmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)     
+#  out = None
+#  (out, err) = p.communicate()
+#  log.debug('querycondor: it took %s seconds to perform the query' %delta)
+#  log.debug('out = %s' % out)
+#  os.path.realpath(path)
+#
+
+
 
 from __future__ import print_function
 import getopt
 import logging
 import os
+import shutil
 import sys
 import subprocess
 
 
 
 def handle_embedfiles(files):
+    '''
+    Takes a files.yaml file for each name and creates a files.tdl for later merging. 
+    '''
+    
+    
     for f in files:
-        (p, fn) = os.path.split(f)
+        p = os.path.dirname(f)
+        fn = os.path.basename(f)
+        #os.path.realpath(path)
         log.debug("base %s  file %s" % (p,fn))
+        log.debug("filepath %s/%s"% (p,fn) )
+        (name, ext) = nameext(fn)
+        yamlfile = "%s.files.yaml" % name
+        yamlfilepath = "%s/%s" % (p, yamlfile)
+        log.debug("checking if %s exists...") % yamlfilepath
+        destname = "%s/%s.files.tdl" % (tempdir,p,name)
+        if os.path.exists(yamlfilepath):
+            log.debug("yep. running embed_files...")
+            cmd = "embed-files -o %s --fileroot %s %s " % ( destname, fileroot, yamlfilepath)
+            log.debug("command: %s" % cmd)
+            
+        else:
+            log.debug("nope. copying tdl to X.files.tdl")
 
+            log.debug("copying %s to %s" % (f,destname))
+            shutil.copyfile(f, destname)
+        
+              
 
 def handle_mergetdls(files):
     for f in files:
@@ -54,16 +91,25 @@ def run_imagefactory(tdlfile):
     log.debug("imagefactory --verbose target_image --template  openstack-kvm ")
     
 
+def nameext(filename):
+        ext = fn.split('.')[-1:]
+        name = '.'.join(fn.split('.')[:-1])
+        return(name, ext)
+    
+
 
 def main():
     
     global log
+    global tempdir
+    
     
     debug = 0
     info = 0
     warn = 0
     logfile = sys.stderr
     outfile = sys.stdout
+    tmpdir = os.path.expanduser("~/tmp/")
     
     usage = """Usage: imgfac-build.py [OPTIONS] TDL  [TDL2  FILE3 ] 
    merge-tdls takes multiple TDLs and merges them, with later TDLs overriding earlier ones. 
