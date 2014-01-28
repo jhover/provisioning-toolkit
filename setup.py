@@ -27,6 +27,7 @@ setup(
     ],
     scripts=[ 'bin/merge-tdls',
               'bin/embed-files',
+              'bin/imgfac-build',
              ],
     data_files=[ ('share/provisioning', ['README.txt', 'LGPL.txt', ] ) ],
 )
