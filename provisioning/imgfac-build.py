@@ -29,7 +29,13 @@
 #    --file /home/imagefactory/lib/storage/7260bef6-3409-4d22-8211-a4e91072d7c0.body 
 #    --is-public False
 
+from __future__ import print_function
+import getopt
+import logging
+import os
+import sys
 import subprocess
+
 
 
 def handle_embedfiles(files):
