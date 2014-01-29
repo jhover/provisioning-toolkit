@@ -69,7 +69,7 @@ def handle_embedfiles(files):
         log.debug("yamlfile=%s" % yamlfile )
         yfp = "%s/%s" % (p, yamlfile)
         log.debug("checking if %s exists..." % yfp  ) 
-        destname = "%s/%s.files.tdl" % (tempdir,p,name)
+        destname = "%s/%s.files.tdl" % (tempdir,name)
         if os.path.exists(yfp):
             log.debug("yep. running embed_files...")
             cmd = "embed-files -o %s --fileroot %s %s " % ( destname, fileroot, yfp)
