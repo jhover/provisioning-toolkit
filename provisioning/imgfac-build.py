@@ -61,18 +61,18 @@ def handle_embedfiles(files):
         p = os.path.dirname(f)
         fn = os.path.basename(f)
         #os.path.realpath(path)
-        log.debug("base %s  file %s" % (p,fn))
+        log.debug("path=%s  filename=%s" % (p,fn))
         log.debug("filepath %s/%s"% (p,fn) )
         (name, ext) = nameext(fn)
         log.debug("name=%s   extension=%s" % (name, ext))
         yamlfile = "%s.files.yaml" % name
-        log.debug("yamlfile= %s"% yamlfile )
-        yamlfilepath = "%s/%s" % (p, yamlfile)
-        log.debug("checking if %s exists...") % yamlfilepath
+        log.debug("yamlfile=%s" % yamlfile )
+        yfp = "%s/%s" % (p, yamlfile)
+        log.debug("checking if %s exists...") % yfp
         destname = "%s/%s.files.tdl" % (tempdir,p,name)
         if os.path.exists(yamlfilepath):
             log.debug("yep. running embed_files...")
-            cmd = "embed-files -o %s --fileroot %s %s " % ( destname, fileroot, yamlfilepath)
+            cmd = "embed-files -o %s --fileroot %s %s " % ( destname, fileroot, yfp)
             log.debug("command: %s" % cmd)
             
         else:
@@ -104,6 +104,7 @@ def main():
     
     global log
     global tempdir
+    global fileroot
     
     
     debug = 0
