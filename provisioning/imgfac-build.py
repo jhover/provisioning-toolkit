@@ -59,7 +59,7 @@ def handle_embedfiles(files):
         name = getname(f)
         ext = getext(f)
         p = getpathdir(f)
-        log.debug("Handling path=s name=%s ext=%s" % (p, name, ext))
+        log.debug("Handling path=%s name=%s ext=%s" % (p, name, ext))
         yamlfile = "%s.files.yaml" % name
         log.debug("yamlfile=%s" % yamlfile )
         yfp = "%s/%s" % (p, yamlfile)
