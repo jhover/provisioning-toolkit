@@ -74,7 +74,10 @@ def handle_embedfiles(files):
             log.debug("yep. running embed_files...")
             cmd = "embed-files -o %s --fileroot %s %s " % ( destname, fileroot, yfp)
             log.debug("command: %s" % cmd)
-            
+            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            (out, err) = p.communicate()
+            log.debug('out = %s' % out)
+        
         else:
             log.debug("nope. copying tdl to X.files.tdl")
 
@@ -112,7 +115,7 @@ def main():
     warn = 0
     logfile = sys.stderr
     outfile = sys.stdout
-    tempdir = os.path.expanduser("~/tmp/")
+    tempdir = os.path.expanduser("~/tmp")
     
     usage = """Usage: imgfac-build.py [OPTIONS] TDL  [TDL2  FILE3 ] 
    merge-tdls takes multiple TDLs and merges them, with later TDLs overriding earlier ones. 
@@ -198,6 +201,9 @@ def main():
     log.debug("%s" %sys.argv)
     files = args
     log.debug(files)
+
+    
+
 
     if files:
         handle_embedfiles(files)
