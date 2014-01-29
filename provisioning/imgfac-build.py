@@ -64,7 +64,9 @@ def handle_embedfiles(files):
         log.debug("base %s  file %s" % (p,fn))
         log.debug("filepath %s/%s"% (p,fn) )
         (name, ext) = nameext(fn)
+        log.debug("name=%s   extension=%s" % (name, ext))
         yamlfile = "%s.files.yaml" % name
+        log.debug("yamlfile= %s"% yamlfile )
         yamlfilepath = "%s/%s" % (p, yamlfile)
         log.debug("checking if %s exists...") % yamlfilepath
         destname = "%s/%s.files.tdl" % (tempdir,p,name)
