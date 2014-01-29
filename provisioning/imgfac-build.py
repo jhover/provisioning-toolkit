@@ -105,11 +105,12 @@ def handle_mergetdls(files):
     
     '''
     for f in files:
-        pass
+        log.debug("Handling %s" % f)
 
 
 def run_imagefactory(tdlfile):
     log.debug("imagefactory --verbose target_image --template  openstack-kvm ")
+
     
 
 def nameext(filename):
@@ -237,11 +238,9 @@ def main():
     files = args
     log.debug(files)
 
-    
-
-
     if files:
         handle_embedfiles(files)
+        make_withfiles(files)
         finaltdl = handle_mergetdls(files)
         run_imagefactory(finaltdl)
         
