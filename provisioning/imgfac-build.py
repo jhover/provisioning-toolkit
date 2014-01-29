@@ -112,7 +112,7 @@ def main():
     warn = 0
     logfile = sys.stderr
     outfile = sys.stdout
-    tmpdir = os.path.expanduser("~/tmp/")
+    tempdir = os.path.expanduser("~/tmp/")
     
     usage = """Usage: imgfac-build.py [OPTIONS] TDL  [TDL2  FILE3 ] 
    merge-tdls takes multiple TDLs and merges them, with later TDLs overriding earlier ones. 
