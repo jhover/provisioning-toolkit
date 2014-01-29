@@ -65,6 +65,8 @@ def handle_embedfiles(files):
         log.debug("filepath %s/%s"% (p,fn) )
         (name, ext) = nameext(fn)
         log.debug("name=%s   extension=%s" % (name, ext))
+        if ext.lower() != 'tdl':
+            raise Exception("All input files must be TDL files with .tdl extension.")
         yamlfile = "%s.files.yaml" % name
         log.debug("yamlfile=%s" % yamlfile )
         yfp = "%s/%s" % (p, yamlfile)
@@ -77,19 +79,24 @@ def handle_embedfiles(files):
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             (out, err) = p.communicate()
             log.debug('out = %s' % out)
-        
         else:
-            log.debug("nope. copying tdl to X.files.tdl")
+            log.debug("nope. nothing needed.")
 
-            log.debug("copying %s to %s" % (f,destname))
-            shutil.copyfile(f, destname)
-        
-              
+def make_withfiles(files):
+    '''
+    Combine all <name>.files.tdl and <name>.tdl files into <name>.withfiles.tdl
+    '''                  
+
 
 def handle_mergetdls(files):
+    '''
+    Combine all <name>.withfiles.tdl into final tdl. 
+    
+    '''
+    
     for f in files:
-        (p, fn) = os.path.split(f)
-        log.debug("base %s  file %s" % (p,fn))
+        p = os.path.dirname(f)
+        fn = os.path.basename(f)
 
 
 def run_imagefactory(tdlfile):
