@@ -118,12 +118,12 @@ def nameext(filename):
     return(name, ext)
 
 def getname(filename):
-    fn = os.path.basename()
+    fn = os.path.basename(filename)
     name = '.'.join(fn.split('.')[:-1])
     return name
 
 def getext(filename):
-    fn = os.path.basename()
+    fn = os.path.basename(filename)
     ext = '.'.join(fn.split('.')[-1:])
     return ext
 
