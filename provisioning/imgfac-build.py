@@ -55,18 +55,11 @@ def handle_embedfiles(files):
     '''
     Takes a files.yaml file for each name and creates a files.tdl for later merging. 
     '''
-    
-    
     for f in files:
-        p = os.path.dirname(f)
-        fn = os.path.basename(f)
-        #os.path.realpath(path)
-        log.debug("path=%s  filename=%s" % (p,fn))
-        log.debug("filepath %s/%s"% (p,fn) )
-        (name, ext) = nameext(fn)
-        log.debug("name=%s   extension=%s" % (name, ext))
-        if ext.lower() != 'tdl':
-            raise Exception("All input files must be TDL files with .tdl extension.")
+        name = getname(f)
+        ext = getext(f)
+        p = getpathdir(f)
+        log.debug("Handling path=s name=%s ext=%s" % (p, name, ext))
         yamlfile = "%s.files.yaml" % name
         log.debug("yamlfile=%s" % yamlfile )
         yfp = "%s/%s" % (p, yamlfile)
@@ -80,12 +73,30 @@ def handle_embedfiles(files):
             (out, err) = p.communicate()
             log.debug('out = %s' % out)
         else:
-            log.debug("nope. nothing needed.")
+            log.debug("No <name>.files.yaml file so doing nothing.")
 
 def make_withfiles(files):
     '''
     Combine all <name>.files.tdl and <name>.tdl files into <name>.withfiles.tdl
-    '''                  
+        '''
+    for f in files:
+        name = getname(f)
+        ext = getext(f)
+        p = getpathdir(f)                  
+        log.debug("Handling path=s name=%s ext=%s" % (p, name, ext))
+        wfp = "%s/%s.files.tdl" % (tempdir,name)
+        destname = "%s/%s.withfiles.tdl" % (tempdir,name)
+        if os.path.exists(wfp):
+            log.debug("yep. running merge-tdls...")
+            cmd = "merge-tdls -o %s %s %s " % ( destname, f, wfp )
+            log.debug("command= %s" % cmd)
+            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            (out, err) = p.communicate()
+            log.debug('out = %s' % out)
+        else:
+            log.debug("No <name>.files.tdl so copying <name>.tdl to <name>.withfiles.tdl...")
+            shutil.copy(f, destname)
+            log.debug("copied %s -> %s" % (f,destname))
 
 
 def handle_mergetdls(files):
@@ -93,10 +104,8 @@ def handle_mergetdls(files):
     Combine all <name>.withfiles.tdl into final tdl. 
     
     '''
-    
     for f in files:
-        p = os.path.dirname(f)
-        fn = os.path.basename(f)
+        pass
 
 
 def run_imagefactory(tdlfile):
@@ -104,10 +113,29 @@ def run_imagefactory(tdlfile):
     
 
 def nameext(filename):
-        ext = '.'.join(filename.split('.')[-1:])
-        name = '.'.join(filename.split('.')[:-1])
-        return(name, ext)
-    
+    ext = '.'.join(filename.split('.')[-1:])
+    name = '.'.join(filename.split('.')[:-1])
+    return(name, ext)
+
+def getname(filename):
+    fn = os.path.basename()
+    name = '.'.join(fn.split('.')[:-1])
+    return name
+
+def getext(filename):
+    fn = os.path.basename()
+    ext = '.'.join(fn.split('.')[-1:])
+    return ext
+
+def getpathdir(filename):
+    p = os.path.dirname(filename)
+    return p
+
+def checkext(filename, ext):
+    e = getext(filename)
+    if e.lower() != ext.lower():
+        raise Exception("All input files must hav .%s extension." % ext)
+
 
 
 def main():
