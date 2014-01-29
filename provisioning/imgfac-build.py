@@ -120,7 +120,7 @@ def handle_mergetdls(files):
             destname = "%s-%s" % (destname, name)
     
     allfiles = " ".join(withfiles)
-    cmd = "merge-tdls -o %s/%s.tdl   " % (tempdir, destname, allfiles )
+    cmd = "merge-tdls -o %s/%s.tdl %s" % (tempdir, destname, allfiles )
     log.debug("command= %s" % cmd)
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     (out, err) = p.communicate()
