@@ -112,13 +112,14 @@ def handle_mergetdls(files):
         ext = getext(f)
         p = getpathdir(f) 
         log.debug("Handling %s" % f)
-        wfp = "%s/%s.files.tdl" % (tempdir,name)
+        wfp = "%s/%s.withfiles.tdl" % (tempdir,name)
         withfiles.append(wfp)
         if destname == "":
             destname = "%s" % name
         else:
             destname = "%s-%s" % (destname, name)
     
+    log.debug("withfiles is %s" % withfiles)
     allfiles = " ".join(withfiles)
     cmd = "merge-tdls -o %s/%s.tdl %s" % (tempdir, destname, allfiles )
     log.debug("command= %s" % cmd)
