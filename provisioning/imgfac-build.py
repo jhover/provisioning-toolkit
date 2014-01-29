@@ -83,7 +83,7 @@ def make_withfiles(files):
         name = getname(f)
         ext = getext(f)
         p = getpathdir(f)                  
-        log.debug("Handling path=s name=%s ext=%s" % (p, name, ext))
+        log.debug("Handling path=%s name=%s ext=%s" % (p, name, ext))
         wfp = "%s/%s.files.tdl" % (tempdir,name)
         destname = "%s/%s.withfiles.tdl" % (tempdir,name)
         if os.path.exists(wfp):
