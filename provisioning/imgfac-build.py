@@ -101,12 +101,35 @@ def make_withfiles(files):
 
 def handle_mergetdls(files):
     '''
-    Combine all <name>.withfiles.tdl into final tdl. 
-    
+    Combine all <name>.withfiles.tdl into final tdl named
+      <name1>-<name2>-<nameN>.tdl
+    Return name of final tdl file path. 
     '''
+    withfiles = []
+    destname = ""
     for f in files:
+        name = getname(f)
+        ext = getext(f)
+        p = getpathdir(f) 
         log.debug("Handling %s" % f)
+        wfp = "%s/%s.files.tdl" % (tempdir,name)
+        withfiles.append(wfp)
+        if destname == "":
+            destname = "%s" % name
+        else:
+            destname = "%s-%s" % (destname, name)
+    
+    allfiles = " ".join(withfiles)
+    cmd = "merge-tdls -o %s/%s.tdl   " % (tempdir, destname, allfiles )
+    log.debug("command= %s" % cmd)
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    (out, err) = p.communicate()
+    log.debug('out = %s' % out)
+    retval = "%s/%s.tdl" % (tempdir, destname)
+    log.debug('returning %s'% retval)
+    return retval
 
+ 
 
 def run_imagefactory(tdlfile):
     log.debug("imagefactory --verbose target_image --template  openstack-kvm ")
