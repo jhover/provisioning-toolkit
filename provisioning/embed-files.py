@@ -41,7 +41,7 @@ def handlefiles(files, outfile= sys.stdout , fileroot = None ):
                 # Remove disallowed characters from embedded files....
                 fc = filecontent.replace('&' , '&amp;')
                 fc2 = fc.replace('<' , '&lt;')
-                of.write("         <file name='%s'>%s</file>\n" % (targetfile,filecontent)) 
+                of.write("         <file name='%s'>%s</file>\n" % (targetfile,fc2)) 
     of.write("  </files>\n</template>")
     of.close()
 
