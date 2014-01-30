@@ -72,6 +72,7 @@ def handle_embedfiles(files):
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             (out, err) = p.communicate()
             log.debug('out = %s' % out)
+            log.debug('err = %s' % err)
         else:
             log.debug("No <name>.files.yaml file so doing nothing.")
 
@@ -93,6 +94,7 @@ def make_withfiles(files):
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             (out, err) = p.communicate()
             log.debug('out = %s' % out)
+            log.debug('err = %s' % err)
         else:
             log.debug("No <name>.files.tdl so copying <name>.tdl to <name>.withfiles.tdl...")
             shutil.copy(f, destname)
@@ -126,6 +128,7 @@ def handle_mergetdls(files):
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     (out, err) = p.communicate()
     log.debug('out = %s' % out)
+    log.debug('err = %s' % err)
     retval = "%s/%s.tdl" % (tempdir, destname)
     log.debug('returning %s'% retval)
     return retval
