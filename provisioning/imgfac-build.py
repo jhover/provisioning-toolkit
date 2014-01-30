@@ -133,7 +133,7 @@ def handle_mergetdls(files):
  
 
 def run_imagefactory(tdlfile):
-    log.debug("imagefactory --verbose target_image --template  openstack-kvm ")
+    log.debug("imagefactory --verbose target_image --template %s openstack-kvm " % tdlfile)
 
     
 

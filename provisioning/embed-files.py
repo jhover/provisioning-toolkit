@@ -38,6 +38,8 @@ def handlefiles(files, outfile= sys.stdout , fileroot = None ):
                     sourcefile = "%s/%s" % (fileroot, sourcefile)
                     log.debug("sourcefile path is %s" % sourcefile)
                 filecontent = open(sourcefile).read()
+                #fc = filecontent.replace('&' , '&amp;')
+                #fc2 = fc.replace('<' , '&lt;')
                 of.write("         <file name='%s'>%s</file>\n" % (targetfile,filecontent)) 
     of.write("  </files>\n</template>")
     of.close()
