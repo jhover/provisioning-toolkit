@@ -148,6 +148,13 @@ Status Details: {'error': None, 'activity': 'Target Image build complete'}
     cmd = "time imagefactory --verbose target_image --template %s openstack-kvm " % tdlfile
     log.debug("cmd is %s" % cmd)
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    sec = 0
+    retcode = None
+    while retcode is None:
+        retcode = p.poll()
+        time.sleep(5)
+        sec = sec + 5
+        log.debug("%s seconds elapsed..." % sec)   
     (out, err) = p.communicate()
     log.debug('out = %s' % out)
     log.debug('err = %s' % err)
