@@ -136,8 +136,43 @@ def handle_mergetdls(files):
  
 
 def run_imagefactory(tdlfile):
-    log.debug("imagefactory --verbose target_image --template %s openstack-kvm " % tdlfile)
+    '''
+out:    
+============ Final Image Details ============
+UUID: aee9b860-c067-4ad8-8622-55a785dd96f4
+Type: target_image
+Status: COMPLETE
+Status Details: {'error': None, 'activity': 'Target Image build complete'}
+   
+    '''
+    cmd = "time imagefactory --verbose target_image --template %s openstack-kvm " % tdlfile
+    log.debug("cmd is %s" % cmd)
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    (out, err) = p.communicate()
+    log.debug('out = %s' % out)
+    log.debug('err = %s' % err)
+    (status, uuid) = parse_imagefactory_return(out)
+    if status is not None:
+        print("glance --verbose image-create --name name --disk-format raw --container-format bare --file /home/imagefactory/lib/storage/%s.body --is-public False" % uuid)
+    else:
+        print("imagefactory had error: %s" % err)
 
+def parse_imagefactory_return(text):
+    uuid = None
+    status = None
+    for line in text:
+        if line[0:4] == 'UUID':
+            uuid = line[6:]
+            
+        if line[0:6] == 'Status':
+            s = line[8:] 
+            if s == 'COMPLETE':
+                status = True
+    if uuid is not None and status is not None:
+        return (status, uuid)
+    else:
+        return (None, None)
+    
     
 
 def nameext(filename):
