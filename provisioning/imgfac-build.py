@@ -148,27 +148,27 @@ Status Details: {'error': None, 'activity': 'Target Image build complete'}
     '''
     cmd = "time imagefactory --verbose target_image --template %s openstack-kvm " % tdlfile
     log.debug("cmd is %s" % cmd)
-    #p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-    #sec = 0
-    #retcode = None
-    #while retcode is None:
-    #    retcode = p.poll()
-    #    time.sleep(5)
-    #    sec = sec + 5
-    #    if sec < 60:        
-    #        log.debug("%s seconds elapsed..." % sec)
-    #    else:
-    #        min =  sec / 60
-    #        secmod = sec % 60
-    #        log.debug("%s min %s sec elapsed..." % (min, secmod))  
-    #(out, err) = p.communicate()
-    #log.debug('out = %s' % out)
-    #log.debug('err = %s' % err)
-    #(status, uuid) = parse_imagefactory_return(out)
-    #if status is not None:
-    #    print("glance --verbose image-create --name name --disk-format raw --container-format bare --file /home/imagefactory/lib/storage/%s.body --is-public False" % uuid)
-    #else:
-    #    print("imagefactory had error: %s" % err)
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    sec = 0
+    retcode = None
+    while retcode is None:
+        retcode = p.poll()
+        time.sleep(5)
+        sec = sec + 5
+        if sec < 60:        
+            log.debug("%s seconds elapsed..." % sec)
+        else:
+            min =  sec / 60
+            secmod = sec % 60
+            log.debug("%s min %s sec elapsed..." % (min, secmod))  
+    (out, err) = p.communicate()
+    log.debug('out = %s' % out)
+    log.debug('err = %s' % err)
+    (status, uuid) = parse_imagefactory_return(out)
+    if status is not None:
+        print("glance --verbose image-create --name name --disk-format raw --container-format bare --file /home/imagefactory/lib/storage/%s.body --is-public False" % uuid)
+    else:
+        print("imagefactory had error: %s" % err)
 
 def parse_imagefactory_return(text):
     uuid = None
