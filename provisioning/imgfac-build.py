@@ -155,7 +155,12 @@ Status Details: {'error': None, 'activity': 'Target Image build complete'}
         retcode = p.poll()
         time.sleep(5)
         sec = sec + 5
-        log.debug("%s seconds elapsed..." % sec)   
+        if sec < 60:        
+            log.debug("%s seconds elapsed..." % sec)
+        else:
+            min =  sec / 60
+            secmod = sec % 60
+            log.debug("%s min %s sec elapsed..." % (min, secmod))  
     (out, err) = p.communicate()
     log.debug('out = %s' % out)
     log.debug('err = %s' % err)
