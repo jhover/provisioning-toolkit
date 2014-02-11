@@ -128,8 +128,8 @@ def handle_mergetdls(files):
     log.debug("command= %s" % cmd)
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     (out, err) = p.communicate()
-    log.debug('out = %s' % out)
     log.debug('err = %s' % err)
+    log.debug('out = %s' % out)
     retval = "%s/%s.tdl" % (tempdir, destname)
     log.debug('returning %s'% retval)
     return retval
@@ -182,8 +182,10 @@ def parse_imagefactory_return(text):
             if s == 'COMPLETE':
                 status = True
     if uuid is not None and status is not None:
+        log.debug("parsed UUID: %s" % uuid)
         return (status, uuid)
     else:
+        log.debug("failed to parse UUID from text: %s" % text)
         return (None, None)
     
     
