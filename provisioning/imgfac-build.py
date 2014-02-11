@@ -46,6 +46,7 @@ import getopt
 import logging
 import os
 import shutil
+import StringIO
 import sys
 import subprocess
 import time
@@ -171,14 +172,14 @@ Status Details: {'error': None, 'activity': 'Target Image build complete'}
     else:
         print("imagefactory had error: %s" % err)
 
-def parse_imagefactory_return(text):
+def parse_imagefactory_returnold(text):
     uuid = None
     status = None
     for line in text:
-        if line[0:4] == 'UUID':
+        if line[:4] == 'UUID':
             uuid = line[6:]
             
-        if line[0:6] == 'Status':
+        if line[:6] == 'Status':
             s = line[8:] 
             if s == 'COMPLETE':
                 status = True
@@ -188,7 +189,40 @@ def parse_imagefactory_return(text):
     else:
         log.debug("failed to parse UUID from text: %s" % text)
         return (None, None)
-    
+
+def parse_imagefactory_return(text):
+    uuid = None
+    status = None
+    buf = StringIO.StringIO(text)
+    for line in buf.readlines():
+        log.debug("line is %s" % line)
+        h1 = line[:4]
+        #print("h1 is '%s'" % h1)
+        if h1 == 'UUID':
+            #print("h1 does equal 'UUID'")
+            uuid = line[6:].strip()
+
+        h2 = line[:7]
+        #print("h2 is '%s'" % h2)
+        if h2 == 'Status:':
+            #print("h2 does equal 'Status:'")
+            s = line[8:]
+            s = s.strip()
+            #print("s is '%s'" % s)
+            if s == 'COMPLETE':
+                #print("s does equal 'COMPLETE'")
+                status = True
+            else:
+                pass
+                #print("%s != %s" % (s,'COMPLETE'))
+    if uuid is not None and status is not None:
+        log.debug("parsed UUID: %s" % uuid)
+        return (status, uuid)
+    else:
+        log.debug("failed to parse UUID from text: %s" % text)
+        return (None, None)
+
+
     
 
 def nameext(filename):
