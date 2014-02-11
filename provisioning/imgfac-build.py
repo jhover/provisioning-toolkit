@@ -151,10 +151,11 @@ Status Details: {'error': None, 'activity': 'Target Image build complete'}
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     sec = 0
     retcode = None
+    INTERVAL = 30
     while retcode is None:
         retcode = p.poll()
-        time.sleep(5)
-        sec = sec + 5
+        time.sleep(INTERVAL)
+        sec = sec + INTERVAL
         if sec < 60:        
             log.debug("%s seconds elapsed..." % sec)
         else:
