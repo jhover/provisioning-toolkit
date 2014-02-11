@@ -195,7 +195,7 @@ def parse_imagefactory_return(text):
     status = None
     buf = StringIO.StringIO(text)
     for line in buf.readlines():
-        log.debug("line is %s" % line)
+        #log.debug("line is %s" % line)
         h1 = line[:4]
         #print("h1 is '%s'" % h1)
         if h1 == 'UUID':
