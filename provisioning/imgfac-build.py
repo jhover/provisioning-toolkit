@@ -61,6 +61,7 @@ def handle_embedfiles(files):
         name = getname(f)
         ext = getext(f)
         p = getpathdir(f)
+        log.info("Embedding files. Handling %s" % f)
         log.debug("Handling path=%s name=%s ext=%s" % (p, name, ext))
         yamlfile = "%s.files.yaml" % name
         log.debug("yamlfile=%s" % yamlfile )
@@ -85,7 +86,8 @@ def make_withfiles(files):
     for f in files:
         name = getname(f)
         ext = getext(f)
-        p = getpathdir(f)                  
+        p = getpathdir(f)
+        log.info("Handling %s" % f)                  
         log.debug("Handling path=%s name=%s ext=%s" % (p, name, ext))
         wfp = "%s/%s.files.tdl" % (tempdir,name)
         destname = "%s/%s.withfiles.tdl" % (tempdir,name)
@@ -115,7 +117,7 @@ def handle_mergetdls(files):
         name = getname(f)
         ext = getext(f)
         p = getpathdir(f) 
-        log.debug("Handling %s" % f)
+        log.info("Handling %s" % f)
         wfp = "%s/%s.withfiles.tdl" % (tempdir,name)
         withfiles.append(wfp)
         if destname == "":
@@ -148,6 +150,7 @@ Status Details: {'error': None, 'activity': 'Target Image build complete'}
    
     '''
     cmd = "time imagefactory --verbose target_image --template %s openstack-kvm " % tdlfile
+    log.info("Running imagefactory: '%s'" % cmd)
     log.debug("cmd is %s" % cmd)
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     sec = 0
@@ -162,7 +165,9 @@ Status Details: {'error': None, 'activity': 'Target Image build complete'}
         else:
             min =  sec / 60
             secmod = sec % 60
-            log.debug("%s min %s sec elapsed..." % (min, secmod))  
+            log.debug("%s min %s sec elapsed..." % (min, secmod))
+            if min % 3  == 0 and secmod == 0:
+                log.info("Running. %s minutes elapsed..." % min)  
     (out, err) = p.communicate()
     log.debug('out = %s' % out)
     log.debug('err = %s' % err)
@@ -170,7 +175,7 @@ Status Details: {'error': None, 'activity': 'Target Image build complete'}
     if status is not None:
         print("glance --verbose image-create --name name --disk-format raw --container-format bare --file /home/imagefactory/lib/storage/%s.body --is-public False" % uuid)
     else:
-        print("imagefactory had error: %s" % err)
+        log.warning("imagefactory had error: %s" % err)
 
 def parse_imagefactory_returnold(text):
     uuid = None
