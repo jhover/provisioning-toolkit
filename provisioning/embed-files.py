@@ -13,7 +13,18 @@
 #      <file name='/path/to/file/filename1.txt'>Content of file 1</file>
 #      <file name='/path/to/file/filename2.txt'>Content of file 2</file>
 #    </files>
+#    <commands>
+#      <command name='basesetup'>
+#     chmod ugo+r /path/to/file/filename1.txt
+#     chmod ugo+r /path/to/file/filename2.txt
+#      </command>
+#     </commands> 
 #  <template>
+#
+# Since it turns out imagefactory sets default perms to 600, maybe we need to explicitly
+# set perms on newly placed files by creating a command to do it. ??
+# TODO
+#
 from __future__ import print_function
 import getopt
 import logging

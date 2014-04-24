@@ -14,11 +14,11 @@ OVERVIEW
 -- Imagefactory, euca-tools, or glance to upload/register images. 
 
 -- CloudInit to handle early runtime contextualization
-  -- e.g. mounting ephemeral storage.
+  -- e.g. mounting ephemeral storage. ??
 
--- Puppet to handle build-time customization. 
+-- Puppet to handle build-time customization. ?? 
 
--- Puppet to handle run-time configuration adjustment. 
+-- Puppet to handle run-time configuration adjustment. ??
 
   
 TEMPLATE CREATION
@@ -28,12 +28,10 @@ TEMPLATE CREATION
 -- 
 
 
-
 VM CREATION
 
 profile 1    +    profile 2   +   profile 3
  files+TDL         files+TDL       files+TDL
- 
 
  
 Embed file contents into partial TDL 
@@ -67,7 +65,6 @@ Create and upload image in Openstack:
 . nova-essex/novarc
 
  glance image-create --name sl6-x8664-if-base --disk-format raw --container-format bare --file /home/imagefactory/lib/storage/0144e595-13cb-40e1-b759-f631edc06c16.body --is-public False
-
 
 'glance image-list' to check
 
