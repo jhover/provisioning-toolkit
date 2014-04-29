@@ -13,12 +13,18 @@ OVERVIEW
 
 -- Imagefactory, euca-tools, or glance to upload/register images. 
 
--- CloudInit to handle early runtime contextualization
-  -- e.g. mounting ephemeral storage. ??
+-- Base and customized configuration embodied in Hiera .yaml files. Defaults included at build-time. Additional local customization (e.g. via userdata) at runtime. 
 
--- Puppet to handle build-time customization. ?? 
+-- Puppet to handle build-time customization. 
 
--- Puppet to handle run-time configuration adjustment. ??
+-- Puppet to handle run-time configuration adjustment.
+
+RATIONALES
+
+
+
+
+
 
   
 TEMPLATE CREATION
