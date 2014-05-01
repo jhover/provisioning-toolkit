@@ -20,8 +20,19 @@ OVERVIEW
 -- Puppet to handle run-time configuration adjustment.
 
 RATIONALES
+-- I want to use as much standard off-the-shelf (even non-cloud) software as possible. Thus imagefactory and Puppet/Hiera, and Condor as core technologies. 
 
+-- I want to use *masterless* Puppet to avoid scaling issues and the problem of certificate generation and validation. This limits the existing/3rd party puppet modules we can use, but the benefits outweigh that. 
 
+-- I want to be able to use the same configuration approach in clouds and non-cloud settings. (I want as little custom work as possible when in a cloud environment.)
+
+-- Because Puppet modules are installed locally via RPM, you get config versioning.
+   -- See http://www.slideshare.net/PuppetLabs/bashton-masterless-puppet
+
+-- I want to have flexibility between: 
+  1) "Baking in" most or all of the node configuration at VM build time, or 
+  2) Customizing all config at VM runtime, or
+  3) Any balance between the two. 
 
 
 
