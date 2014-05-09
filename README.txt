@@ -8,7 +8,7 @@ provisioning-toolkit
    -- I.e. hierarchical 'make' using imagefactory.
    -- Scripts to embed file contents into TDLs (embed-files)
    -- Scripts to merge TDLs hierarchically (restoring Boxgrinder's ability to have an inheritance tree of image definitions). (merge-tdls)
-   -- Script to invoke iagefactory/oz to build images (imgfac-build)
+   -- Script to invoke imagefactory/oz to build images (imgfac-build)
    -- Imagefactory, euca-tools, or glance to upload/register images.
    -- HTcondor
 
@@ -30,6 +30,7 @@ provisioning-config
     -- osg worker node config
     -- atlas worker node config
 
+
 WORKFLOW SUMMARY
 
 1) Define build template(s)
@@ -49,9 +50,12 @@ WORKFLOW SUMMARY
 
 The only custom component is the small runpuppet init script, which pulls Hiera local config from userdata, and runs 'puppet apply'.
 
-Complex virtual layouts (e.g. cluster head node, workers, and squid) will need higher-level orchestration. 
+Complex virtual layouts (e.g. cluster head node, workers, and squid) will need higher-level orchestration. We are currently looking into an appropriate mechanism for handling this. CloudCRV and StarCluster are existing examples of this sort of tool. The current plan is to attempt to leverage DagMan. In this approach, VM submission would consist of a DAG:
 
- 
+         collector/negotiator  ---> schedd ---> startd(s) 
+
+In each case, the name/address of the new host would be used to adjust the configuration of the following node invocations/configuration. 
+           
 
 RATIONALES
 -- A desire to use as much standard off-the-shelf (preferably non-cloud) software as possible. Thus imagefactory, Puppet/Hiera, and Yum/RPM as core technologies. 
@@ -67,8 +71,7 @@ RATIONALES
    -- We are already experienced in building RPMs and maintaining Yum repos, so this was no extra trouble. 
 
 
-
-REJECTED ALTERNATIVES
+ALTERNATIVES/ RELATED PROJECTS
 
 HEPPIX contextualization 
 ------------------------
@@ -76,12 +79,34 @@ This is a set of guidelines developed for Cloud VM initialization by a HEPPIX wo
 
 This was rejected because 1) its very limited user base/audience and thus lack of vigorous maintenance and development, 2) it imposes a set of awkward requirements for use, and 3) only useful in a cloud context.   
 
-
 Cloud-init
 ----------
+http://cloudinit.readthedocs.org/en/latest/
+
 Cloud-init is a runtime contextualization tool that originated on Debian. It establishes a standard for the userdata format (a mime-multipart file) with a set of supported types, and the init program on the VM to unpack and execute them. It even provides a plugin datasource construct, which can get input data from sources other than the metadata service (e.g. other clouds, mounted config image). 
 
 The only reason this was rejected as a general framework is that it currently doesn't allow usage outside of a cloud context. Also, if one is going to use Puppet, then the cloud-init complex capabilities are overkill. Another negative is that it requires a utility to create the userdata file from sub-components on the submit side, although this is a minor concern.  
 
 As it is, cloud-init could be relatively cleanly integrated with the Puppet infrastructure of this provisioning-X project, by having cloud-init pull the Hiera config from userdata, and execute puppet apply. 
+
+Star Cluster  
+------------
+http://star.mit.edu/cluster/
+
+Assumes and requires the use of Sun Grid Engine as the local batch system on the virtual cluster. It is still a possibility that this software may be adaptable for use as the orchestration component.  
+
+Henrik's ATLASSGE Modules
+-------------------------
+https://github.com/spiiph/atlasgce-modules/
+
+These are a set of custom Puppet modules and associated scripts used to bootstrap a virtual cluster on Google Compute Engine. They were not directly usable for this project (e.g., the Puppet modules are not parameterized), but may provide a useful starting point for some node/package types. 
+
+
+SOURCE CODE
+http://svn.usatlas.bnl.gov/svn/griddev/provisioning-toolkit/
+http://svn.usatlas.bnl.gov/svn/griddev/provisioning-templates/
+http://svn.usatlas.bnl.gov/svn/griddev/provisioning-config/
+
+
+
  
