@@ -1,93 +1,62 @@
 Provisioning Toolkit
 =====================
 
-This project is intended to bring together a general-purpose set of utilities and practices for creating and managing virtual machines resources. 
+This overall project is intended to bring together a general-purpose set of utilities and practices for creating and managing customized virtual machine resources. The components of the project are:
 
-OVERVIEW
+provisioning-toolkit
+--------------------
+   -- I.e. hierarchical 'make' using imagefactory.
+   -- Scripts to embed file contents into TDLs (embed-files)
+   -- Scripts to merge TDLs hierarchically (restoring Boxgrinder's ability to have an inheritance tree of image definitions). (merge-tdls)
+   -- Script to invoke iagefactory/oz to build images (imgfac-build)
+   -- Imagefactory, euca-tools, or glance to upload/register images.
 
--- Scripts to embed file contents into TDLs
+provisioning-templates
+----------------------
+ -- TDL (template descripion language) files for use with imagefactory. 
+ -- Feature-specific files processed 
 
--- Scripts to merge TDLs hierarchically (restoring the ability a la Boxgrinder to have an inheritance tree of image definitions). 
-
--- Imagefactory/oz to build images
-
--- Imagefactory, euca-tools, or glance to upload/register images. 
-
--- Base and customized configuration embodied in Hiera .yaml files. Defaults included at build-time. Additional local customization (e.g. via userdata) at runtime. 
-
--- Puppet to handle build-time customization. 
-
--- Puppet to handle run-time configuration adjustment.
+provisioning-config
+-------------------
+  -- RPM to be installed on VMs for profile-specific build and runtime configuration. 
+  -- Uses puppet apply 
+  -- Base and customized configuration embodied in Hiera .yaml files. Defaults included at build-time. Additional local customization (e.g. via userdata) at runtime.
+  -- Includes parameterized Puppet modules for all config tasks, e.g.
+    -- ssh authorized keys setup
+    -- ephemeral disk detection and setup
+    -- condor daemon (startd, schedd, central manager) configuration
+    -- cvmfs setup and config
+    -- osg worker node config
+    -- atlas worker node config
 
 RATIONALES
--- I want to use as much standard off-the-shelf (even non-cloud) software as possible. Thus imagefactory and Puppet/Hiera, and Condor as core technologies. 
+-- A desire to use as much standard off-the-shelf (preferably non-cloud) software as possible. Thus imagefactory, Puppet/Hiera, and Yum/RPM as core technologies. 
 
--- I want to use *masterless* Puppet to avoid scaling issues and the problem of certificate generation and validation. This limits the existing/3rd party puppet modules we can use, but the benefits outweigh that. 
+-- We must use *masterless* Puppet to avoid scaling issues and the problem of certificate generation and validation in a dynamic context. Unfortunately this limits the existing/3rd party puppet modules we can use, but the benefits outweigh that. 
 
--- I want to be able to use the same configuration approach in clouds and non-cloud settings. (I want as little custom work as possible when in a cloud environment.)
+-- I want to be able to use the same configuration approach in Clouds and non-Cloud settings. (I want as little custom work as possible when in a cloud environment.) In theory, the node configuration component of this project could be used to manage bare-metal hosts. 
 
--- Because Puppet modules are installed locally via RPM, you get config versioning.
+-- Because Puppet modules are installed locally via RPM, you get config versioning for free.
    -- See http://www.slideshare.net/PuppetLabs/bashton-masterless-puppet
+   -- We are already experienced in building RPMs and maintaining Yum repos, so this was no extra trouble. 
 
--- I want to have flexibility between: 
+-- We want to have flexibility between: 
   1) "Baking in" most or all of the node configuration at VM build time, or 
-  2) Customizing all config at VM runtime, or
-  3) Any balance between the two. 
+  2) Customizing all config at VM runtime, 
+  3) Any balance between the two,
+
+ALTERNATIVES
+
+Cloud-init
+
+
+Heppix contextualization 
 
 
 
 
-  
-TEMPLATE CREATION
-
--- File content cannot contain a few characters which are special to XML. You must replace '<' with &lt;   and &   with &amp;
-
--- 
 
 
-VM CREATION
-
-profile 1    +    profile 2   +   profile 3
- files+TDL         files+TDL       files+TDL
-
- 
-Embed file contents into partial TDL 
- 
-embed-files -o work/sl6-x86_64-base.files.tdl --fileroot provisioning-templates/files provisioning-templates/sl6-x86_64-base.files.yaml
-
-Merge file TDL with general TDL
-
-merge-tdls -o work/sl6-x86_64-base-withfiles.tdl work/sl6-x86_64-base.files.tdl provisioning-templates/sl6-x86_64-base.tdl
-
-Build base image:
-
-imagefactory --verbose base_image work/sl6-x86_64-base-withfiles.tdl
-
-Note imageID:  e.g. c9d8b606-2776-439a-b206-1a66c0b8b1a6
-
-imagefactory --verbose target_image  --id c9d8b606-2776-439a-b206-1a66c0b8b1a6 openstack-kvm
-
-Note target image id:  e.g. ba7fa96d-e892-4471-a1da-a1990104ffcc
-
-imagefactory --verbose target_image  -id c9d8b606-2776-439a-b206-1a66c0b8b1a6 ec2
-
-Note target image id:
-
-fef23f6f-20c9-401a-852f-20a179b97ab0
-
-0144e595-13cb-40e1-b759-f631edc06c16
-
-
-Create and upload image in Openstack:
-. nova-essex/novarc
-
- glance image-create --name sl6-x8664-if-base --disk-format raw --container-format bare --file /home/imagefactory/lib/storage/0144e595-13cb-40e1-b759-f631edc06c16.body --is-public False
-
-'glance image-list' to check
-
-'euca-describe-images' to get ami ID. 
-
-'euca-run-instance <ami-id>' to run. 
 
 
 
