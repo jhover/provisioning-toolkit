@@ -10,6 +10,7 @@ provisioning-toolkit
    -- Scripts to merge TDLs hierarchically (restoring Boxgrinder's ability to have an inheritance tree of image definitions). (merge-tdls)
    -- Script to invoke iagefactory/oz to build images (imgfac-build)
    -- Imagefactory, euca-tools, or glance to upload/register images.
+   -- HTcondor
 
 provisioning-templates
 ----------------------
@@ -20,7 +21,7 @@ provisioning-config
 -------------------
   -- RPM to be installed on VMs for profile-specific build and runtime configuration. 
   -- Uses puppet apply 
-  -- Base and customized configuration embodied in Hiera .yaml files. Defaults included at build-time. Additional local customization (e.g. via userdata) at runtime.
+  -- Default and customized configuration embodied in Hiera .yaml files. Defaults included at build-time. Additional local customization (e.g. via userdata) at runtime.
   -- Includes parameterized Puppet modules for all config tasks, e.g.
     -- ssh authorized keys setup
     -- ephemeral disk detection and setup
@@ -29,8 +30,33 @@ provisioning-config
     -- osg worker node config
     -- atlas worker node config
 
+WORKFLOW SUMMARY
+
+1) Define build template(s)
+  -- Include provisioning-config Yum repo and RPM. 
+  -- Include any other RPMs desired, so as to minimize runtime RPM downloads
+  -- Pre-define Hiera defaults (potentially enough to not require runtime customization at all). 
+
+2) Run imgfac-build to merge and build image for particular platform (EC2, KVM/Openstack, etc). 
+
+3) Upload and register image to IaaS. 
+
+4) Invoke image with userdata in Hiera YAML format. Add or subtract classes & config to define nodes to different profiles. 
+
+5) runpuppet init script 1) grabs userdata to disk, 2) runs 'puppet apply'
+
+6) Puppet merges defaults + dynamic config, and applies with puppet. 
+
+The only custom component is the small runpuppet init script, which pulls Hiera local config from userdata, and runs 'puppet apply'.
+
+Complex virtual layouts (e.g. cluster head node, workers, and squid) will need higher-level orchestration. 
+
+ 
+
 RATIONALES
 -- A desire to use as much standard off-the-shelf (preferably non-cloud) software as possible. Thus imagefactory, Puppet/Hiera, and Yum/RPM as core technologies. 
+
+-- Permit complete configuration at build-time if this is desired. And allow for a continuum of build-time vs. run-time configuration. 
 
 -- We must use *masterless* Puppet to avoid scaling issues and the problem of certificate generation and validation in a dynamic context. Unfortunately this limits the existing/3rd party puppet modules we can use, but the benefits outweigh that. 
 
@@ -40,24 +66,22 @@ RATIONALES
    -- See http://www.slideshare.net/PuppetLabs/bashton-masterless-puppet
    -- We are already experienced in building RPMs and maintaining Yum repos, so this was no extra trouble. 
 
--- We want to have flexibility between: 
-  1) "Baking in" most or all of the node configuration at VM build time, or 
-  2) Customizing all config at VM runtime, 
-  3) Any balance between the two,
 
-ALTERNATIVES
+
+REJECTED ALTERNATIVES
+
+HEPPIX contextualization 
+------------------------
+This is a set of guidelines developed for Cloud VM initialization by a HEPPIX working group. It is based on providing a small ISO9660 disk image to be mounted on the VM, with a defined directory hierarchy, and init scripts which use those settings. 
+
+This was rejected because 1) its very limited user base/audience and thus lack of vigorous maintenance and development, 2) it imposes a set of awkward requirements for use, and 3) only useful in a cloud context.   
+
 
 Cloud-init
+----------
+Cloud-init is a runtime contextualization tool that originated on Debian. It establishes a standard for the userdata format (a mime-multipart file) with a set of supported types, and the init program on the VM to unpack and execute them. It even provides a plugin datasource construct, which can get input data from sources other than the metadata service (e.g. other clouds, mounted config image). 
 
+The only reason this was rejected as a general framework is that it currently doesn't allow usage outside of a cloud context. Also, if one is going to use Puppet, then the cloud-init complex capabilities are overkill. Another negative is that it requires a utility to create the userdata file from sub-components on the submit side, although this is a minor concern.  
 
-Heppix contextualization 
-
-
-
-
-
-
-
-
-
+As it is, cloud-init could be relatively cleanly integrated with the Puppet infrastructure of this provisioning-X project, by having cloud-init pull the Hiera config from userdata, and execute puppet apply. 
  
