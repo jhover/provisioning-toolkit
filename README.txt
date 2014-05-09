@@ -54,9 +54,9 @@ Complex virtual layouts (e.g. cluster head node, workers, and squid) will need h
 
          collector/negotiator  ---> schedd ---> startd(s) 
 
-In each case, the name/address of the new host would be used to adjust the configuration of the following node invocations/configuration. 
+In each case, the name/address of the new host would be used to adjust the configuration of the following node invocations/configuration. It appears that there is a mechanims for such macros to be defined to allow values to be set from one job and used in the submit classad of the next. 
            
-
+           
 RATIONALES
 -- A desire to use as much standard off-the-shelf (preferably non-cloud) software as possible. Thus imagefactory, Puppet/Hiera, and Yum/RPM as core technologies. 
 
