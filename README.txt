@@ -34,27 +34,23 @@ provisioning-config
 WORKFLOW SUMMARY
 
 1) Define build template(s)
-  -- Include provisioning-config Yum repo and RPM. 
+  -- Include provisioning-config Yum repo and RPM. This RPM contains all Puppet *code* used for config.  
   -- Include any other RPMs desired, so as to minimize runtime RPM downloads
   -- Pre-define Hiera defaults (potentially enough to not require runtime customization at all). 
 
-2) Run imgfac-build to merge and build image for particular platform (EC2, KVM/Openstack, etc). 
+2) Run imgfac-build to merge and build image for particular platform (EC2, KVM/Openstack, etc).
 
 3) Upload and register image to IaaS. 
 
-4) Invoke image with userdata in Hiera YAML format. Add or subtract classes & config to define nodes to different profiles. 
+4) Invoke image(s) with or without userdata. If userdata is needed, include as a write_files entry creating /etc/hiera/loca.yaml. Add or subtract classes & config to define nodes to different profiles. 
 
-5) runpuppet init script 1) grabs userdata to disk, 2) runs 'puppet apply'
+5) cloud-init grabs userdata to disk, creating local.yaml.  
 
-6) Puppet merges defaults + dynamic config, and applies with puppet. 
+6) Puppet runs via cron at boot and hourly and merges defaults + dynamic config, and applies with puppet. 
 
-The only custom component is the small runpuppet init script, which pulls Hiera local config from userdata, and runs 'puppet apply'.
+The only custom component is the small runpuppet cron script, which runs 'puppet apply'.
 
-Complex virtual layouts (e.g. cluster head node, workers, and squid) will need higher-level orchestration. We are currently looking into an appropriate mechanism for handling this. CloudCRV and StarCluster are existing examples of this sort of tool. The current plan is to attempt to leverage DagMan. In this approach, VM submission would consist of a DAG:
-
-         collector/negotiator  ---> schedd ---> startd(s) 
-
-In each case, the name/address of the new host would be used to adjust the configuration of the following node invocations/configuration. It appears that there is a mechanims for such macros to be defined to allow values to be set from one job and used in the submit classad of the next. 
+Complex virtual layouts (e.g. cluster head node, workers, and squid) will need higher-level orchestration. We are currently looking into an appropriate mechanism for handling this. 
            
            
 RATIONALES
