@@ -10,17 +10,18 @@ provisioning-toolkit
    -- Scripts to merge TDLs hierarchically (restoring Boxgrinder's ability to have an inheritance tree of image definitions). (merge-tdls)
    -- Script to invoke imagefactory/oz to build images (imgfac-build)
    -- Imagefactory, euca-tools, or glance to upload/register images.
-   -- HTcondor
-
+   -- Tools to generate userdata files and generate HTCondor-G submit files for arbitrary node types. 
+     
 provisioning-templates
 ----------------------
  -- TDL (template descripion language) files for use with imagefactory. 
  -- Feature-specific files processed 
+ -- Templates for submit-side cloud-init and/or puppet/hiera config generation. 
 
 provisioning-config
 -------------------
   -- RPM to be installed on VMs for profile-specific build and runtime configuration. 
-  -- Uses puppet apply 
+  -- Uses 'puppet apply' 
   -- Default and customized configuration embodied in Hiera .yaml files. Defaults included at build-time. Additional local customization (e.g. via userdata) at runtime.
   -- Includes parameterized Puppet modules for all config tasks, e.g.
     -- ssh authorized keys setup
@@ -29,7 +30,6 @@ provisioning-config
     -- cvmfs setup and config
     -- osg worker node config
     -- atlas worker node config
-
 
 WORKFLOW SUMMARY
 
