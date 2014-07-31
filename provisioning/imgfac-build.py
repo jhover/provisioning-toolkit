@@ -269,6 +269,7 @@ def main():
     logfile = sys.stderr
     outfile = sys.stdout
     tempdir = os.path.expanduser("~/tmp")
+    target = 'openstack-kvm'
     
     usage = """Usage: imgfac-build.py [OPTIONS] TDL  [TDL2  FILE3 ] 
    merge-tdls takes multiple TDLs and merges them, with later TDLs overriding earlier ones. 
@@ -280,6 +281,7 @@ def main():
         -r --fileroot               <working directory>
         -V --version                Print program version and exit.
         -o --outfile                STDOUT
+        -t --target                 Output format [openstack-kvm|ec2] 
         
      """
 
@@ -287,7 +289,7 @@ def main():
     argv = sys.argv[1:]
     try:
         opts, args = getopt.getopt(argv, 
-                                   "hdvt:r:L:o:", 
+                                   "hdvt:r:L:o:t:", 
                                    ["help", 
                                     "debug", 
                                     "verbose",
@@ -295,6 +297,7 @@ def main():
                                     "fileroot=",
                                     "logfile=",
                                     "outfile=",
+                                    "target=",
                                     ])
     except getopt.GetoptError, error:
         print( str(error))
@@ -312,8 +315,8 @@ def main():
             logfile = arg
         elif opt in ("-r","--fileroot"):
             fileroot = arg
-        elif opt in ("-t", "--tempdir"):
-            tempdir = arg
+        elif opt in ("-t", "--target"):
+            target = arg
                
     
     major, minor, release, st, num = sys.version_info
