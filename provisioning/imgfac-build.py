@@ -149,7 +149,7 @@ Status: COMPLETE
 Status Details: {'error': None, 'activity': 'Target Image build complete'}
    
     '''
-    cmd = "time imagefactory --verbose target_image --template %s openstack-kvm " % tdlfile
+    cmd = "time imagefactory --verbose target_image --template %s %s " % (tdlfile, target)
     log.info("Running imagefactory: '%s'" % cmd)
     log.debug("cmd is %s" % cmd)
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
