@@ -261,7 +261,7 @@ def main():
     global log
     global tempdir
     global fileroot
-    
+    global target 
     
     debug = 0
     info = 0
