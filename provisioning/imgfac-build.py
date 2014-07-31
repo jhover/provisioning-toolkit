@@ -282,14 +282,14 @@ def main():
         -V --version                Print program version and exit.
         -o --outfile                STDOUT
         -t --target                 Output format [openstack-kvm|ec2] 
-        
+        -w --workdir                Temporary workdir [~/tmp]
      """
 
     # Handle command line options
     argv = sys.argv[1:]
     try:
         opts, args = getopt.getopt(argv, 
-                                   "hdvt:r:L:o:t:", 
+                                   "hdvt:r:L:o:t:w:", 
                                    ["help", 
                                     "debug", 
                                     "verbose",
@@ -298,6 +298,7 @@ def main():
                                     "logfile=",
                                     "outfile=",
                                     "target=",
+                                    "workdir=",
                                     ])
     except getopt.GetoptError, error:
         print( str(error))
@@ -317,7 +318,8 @@ def main():
             fileroot = arg
         elif opt in ("-t", "--target"):
             target = arg
-               
+        elif opt in ("-w", "--workdir"):
+            tempdir = arg               
     
     major, minor, release, st, num = sys.version_info
     FORMAT24="[ %(levelname)s ] %(asctime)s %(filename)s (Line %(lineno)d): %(message)s"
