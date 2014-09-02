@@ -140,7 +140,7 @@ def handle_mergetdls(files):
 
 def run_imagefactory(tdlfile):
     log.info("Running imagefactory base...")
-    (status,uuid) = run_imagefactory_base(tdlfile)
+    (status, uuid) = run_imagefactory_base(tdlfile)
     log.info("Ran imagefactory base...") 
     if uuid is not None and target is not None:
         (status,uuid) = run_imagefactory_target(uuid, target)
@@ -179,6 +179,7 @@ Status Details: {'error': None, 'activity': 'Target Image build complete'}
     log.debug('out = %s' % out)
     log.debug('err = %s' % err)
     (status, uuid) = parse_imagefactory_return(out)
+    return (status,uuid)
     
 
 def run_imagefactory_target(uuid):
