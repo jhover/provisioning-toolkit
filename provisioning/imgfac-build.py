@@ -156,7 +156,7 @@ Status: COMPLETE
 Status Details: {'error': None, 'activity': 'Target Image build complete'}
    
     '''
-    cmd = "time imagefactory --verbose base_image --template %s " % (tdlfile)
+    cmd = "time imagefactory --debug base_image --template %s " % (tdlfile)
     log.info("Running imagefactory: '%s'" % cmd)
     log.debug("cmd is %s" % cmd)
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
@@ -182,7 +182,7 @@ Status Details: {'error': None, 'activity': 'Target Image build complete'}
     
 
 def run_imagefactory_target(uuid):
-    cmd = "time imagefactory --verbose target_image --id %s " % (uuid, target)
+    cmd = "time imagefactory --debug target_image --id %s %s " % (uuid, target)
     log.info("Running imagefactory: '%s'" % cmd)
     log.debug("cmd is %s" % cmd)
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
@@ -206,10 +206,11 @@ def run_imagefactory_target(uuid):
     log.debug('err = %s' % err)
     (status, uuid) = parse_imagefactory_return(out)
     
-    if status is not None and target=='openstack-kvm':
-        print("glance --verbose image-create --name name --disk-format raw --container-format bare --file /home/imagefactory/lib/storage/%s.body --is-public False" % uuid)
-    elif target == 'ec2':
-        print("imagefactory provider_image --id %s ec2 @us-east-1 ec2_credentials.xml" % uuid)
+    if status is not None: 
+        if target == 'openstack-kvm':
+            print("glance --verbose image-create --name name --disk-format raw --container-format bare --file /home/imagefactory/lib/storage/%s.body --is-public False" % uuid)
+        elif target == 'ec2':
+            print("imagefactory provider_image --id %s ec2 @us-east-1 ec2_credentials.xml" % uuid)
     else:
         log.warning("imagefactory had error: %s" % err)
 
@@ -243,7 +244,7 @@ def parse_imagefactory_return(text):
         log.info("Parsed UUID: %s" % uuid)
         return (status, uuid)
     else:
-        log.debug("failed to parse UUID from text: %s" % text)
+        log.error("failed to parse UUID from text: %s" % text)
         return (None, None)
    
 
