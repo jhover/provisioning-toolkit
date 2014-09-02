@@ -47,10 +47,6 @@ euca2ools-2.1.4-1.el6.noarch
 python-glanceclient-0.8.0-2.el6.noarch
 
 
-
-
-
-
 FIXES, CAVEATS
 
 Fix augeas via guestfs:
@@ -63,6 +59,20 @@ Fix augeas via guestfs:
 Ensure imagefactory/oz dirs are sufficiently big to handle images
 
 
+Fix 
+ /usr/lib/python2.6/site-packages/imagefactory_plugins/EC2Cloud/EC2Cloud.py
 
+Line 977:
+ reservation = conn.run_instances(ami_id['img_id'] , instance_type=instance_type, key_name=key_name, security_groups = [ factory_security_group_name ])
+
+?? Boto
+
+
+
+
+                                   ^^^^^^^^^^^^^^^^^
+AWS INFO
+Spot price query:
+ ec2-describe-spot-price-history -H --instance-type r3.8xlarge | grep Linux | grep -v SUSE | grep us-east | awk '{sum+=$2} END { print sum/NR}'
 
 

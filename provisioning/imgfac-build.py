@@ -137,9 +137,16 @@ def handle_mergetdls(files):
     log.debug('returning %s'% retval)
     return retval
 
- 
 
 def run_imagefactory(tdlfile):
+    log.info("Running imagefactory base...")
+    (status,uuid) = run_imagefactory_base(tdlfile)
+    log.info("Ran imagefactory base...") 
+    if uuid is not None and target is not None:
+        (status,uuid) = run_imagefactory_target(uuid, target)
+    log.info("Ran imagefactory target...")
+
+def run_imagefactory_base(tdlfile):
     '''
 out:    
 ============ Final Image Details ============
@@ -149,7 +156,7 @@ Status: COMPLETE
 Status Details: {'error': None, 'activity': 'Target Image build complete'}
    
     '''
-    cmd = "time imagefactory --verbose target_image --template %s %s " % (tdlfile, target)
+    cmd = "time imagefactory --verbose base_image --template %s " % (tdlfile)
     log.info("Running imagefactory: '%s'" % cmd)
     log.debug("cmd is %s" % cmd)
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
@@ -172,6 +179,33 @@ Status Details: {'error': None, 'activity': 'Target Image build complete'}
     log.debug('out = %s' % out)
     log.debug('err = %s' % err)
     (status, uuid) = parse_imagefactory_return(out)
+    
+
+def run_imagefactory_target(uuid):
+    cmd = "time imagefactory --verbose target_image --id %s " % (uuid, target)
+    log.info("Running imagefactory: '%s'" % cmd)
+    log.debug("cmd is %s" % cmd)
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    sec = 0
+    retcode = None
+    INTERVAL = 30
+    while retcode is None:
+        retcode = p.poll()
+        time.sleep(INTERVAL)
+        sec = sec + INTERVAL
+        if sec < 60:        
+            log.debug("%s seconds elapsed..." % sec)
+        else:
+            min =  sec / 60
+            secmod = sec % 60
+            log.debug("%s min %s sec elapsed..." % (min, secmod))
+            if min % 3  == 0 and secmod == 0:
+                log.info("Running. %s minutes elapsed..." % min)  
+    (out, err) = p.communicate()
+    log.debug('out = %s' % out)
+    log.debug('err = %s' % err)
+    (status, uuid) = parse_imagefactory_return(out)
+    
     if status is not None and target=='openstack-kvm':
         print("glance --verbose image-create --name name --disk-format raw --container-format bare --file /home/imagefactory/lib/storage/%s.body --is-public False" % uuid)
     elif target == 'ec2':
@@ -179,23 +213,6 @@ Status Details: {'error': None, 'activity': 'Target Image build complete'}
     else:
         log.warning("imagefactory had error: %s" % err)
 
-def parse_imagefactory_returnold(text):
-    uuid = None
-    status = None
-    for line in text:
-        if line[:4] == 'UUID':
-            uuid = line[6:]
-            
-        if line[:6] == 'Status':
-            s = line[8:] 
-            if s == 'COMPLETE':
-                status = True
-    if uuid is not None and status is not None:
-        log.debug("parsed UUID: %s" % uuid)
-        return (status, uuid)
-    else:
-        log.debug("failed to parse UUID from text: %s" % text)
-        return (None, None)
 
 def parse_imagefactory_return(text):
     uuid = None
@@ -223,14 +240,12 @@ def parse_imagefactory_return(text):
                 pass
                 #print("%s != %s" % (s,'COMPLETE'))
     if uuid is not None and status is not None:
-        log.debug("parsed UUID: %s" % uuid)
+        log.info("Parsed UUID: %s" % uuid)
         return (status, uuid)
     else:
         log.debug("failed to parse UUID from text: %s" % text)
         return (None, None)
-
-
-    
+   
 
 def nameext(filename):
     ext = '.'.join(filename.split('.')[-1:])
@@ -271,7 +286,7 @@ def main():
     logfile = sys.stderr
     outfile = sys.stdout
     tempdir = os.path.expanduser("~/tmp")
-    target = 'openstack-kvm'
+    target = None
     
     usage = """Usage: imgfac-build.py [OPTIONS] TDL  [TDL2  FILE3 ] 
    merge-tdls takes multiple TDLs and merges them, with later TDLs overriding earlier ones. 
