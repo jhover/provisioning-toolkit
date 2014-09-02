@@ -156,7 +156,7 @@ Status: COMPLETE
 Status Details: {'error': None, 'activity': 'Target Image build complete'}
    
     '''
-    cmd = "time imagefactory --debug base_image --template %s " % (tdlfile)
+    cmd = "time imagefactory --debug base_image %s " % (tdlfile)
     log.info("Running imagefactory: '%s'" % cmd)
     log.debug("cmd is %s" % cmd)
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
