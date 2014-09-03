@@ -1,3 +1,28 @@
+INSTALLATION PROGRAM & DEPS
+
+Install imagefactory latest:
+
+git clone https://github.com/redhat-imaging/imagefactory.git
+mkdir -p ~/src/rpm/imgfac ; 
+cd imagefactory; python setupy.py bdist_rpm; cp dist/image*.noarch.rpm ~/src/rpm/imgfac
+cd imagefactory_plugins
+python setupy.py bdist_rpm; cp dist/image*.noarch.rpm ~/src/rpm/imgfac
+
+python-cloudservers:
+ 
+wget https://pypi.python.org/packages/source/p/python-cloudservers/python-cloudservers-1.2.tar.gz
+tar xvzf python-cloudservers-1.2.tar.gz ; cd python-cloudservers-1.2
+python setupy.py bdist_rpm; cp dist/image*.noarch.rpm ~/src/rpm/imgfac
+
+yum localinstall ~/src/rpm/imgfac/*.rpm
+
+
+FIXES
+-- ElementTree/expat may not parse properly XML comment blocks in TDLs. Better to remove them. 
+-- A Nova.info link in /etc/imagefactory/plugins.d may interfere with proper build. 
+-- Conversely, be sure to directory and links in /etc/imagefactory/plugins.d/ to 
+/usr/lib/python2.6/site-packages/imagefactory_plugins/*/*.info
+
 
  
 TEMPLATE CREATION
@@ -50,3 +75,14 @@ Create and upload image in Openstack:
 'euca-describe-images' to get ami ID. 
 
 'euca-run-instance <ami-id>' to run. 
+
+
+Create and upload image on EC2:
+
+
+
+Need "ec2_credentials.xml". Create with create-ec2-factory-credentials from imagefactory-plugins RPM. 
+
+
+
+
