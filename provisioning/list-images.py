@@ -13,6 +13,7 @@ import json
 from os import path
 from pprint import pprint
 import time
+import datetime
 
 #json_file='a.json' 
 filelist = glob.glob("%s/*.meta" % imagedir)
@@ -21,8 +22,8 @@ for f in filelist:
     
     
     json_data=open(f)
-    ftime = time.ctime(path.getmtime(f))
-    
+    t = path.getmtime(f)
+    ftime = datetime.datetime.fromtimestamp(t)
     data = json.load(json_data)
     json_data.close()
     #pprint(data)
@@ -30,7 +31,7 @@ for f in filelist:
     s += " %s " % ftime
     s+= " %s " % data['identifier']
     s+= " %s " % data['type']
-   
+ 
     template = data['template']
         
     print(s)
