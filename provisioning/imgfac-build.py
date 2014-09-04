@@ -280,11 +280,13 @@ def main():
     global log
     global tempdir
     global fileroot
-    global target 
+    global target
+    global tdlonly 
     
     debug = 0
     info = 0
     warn = 0
+    tdlonly = 0
     logfile = sys.stderr
     outfile = sys.stdout
     tempdir = os.path.expanduser("~/tmp")
@@ -302,13 +304,14 @@ def main():
         -o --outfile                STDOUT
         -t --target                 Output format [openstack-kvm|ec2] 
         -w --workdir                Temporary workdir [~/tmp]
+        -T --tdlonly                Just create TDL, do not build. 
      """
 
     # Handle command line options
     argv = sys.argv[1:]
     try:
         opts, args = getopt.getopt(argv, 
-                                   "hdvt:r:L:o:t:w:", 
+                                   "hdvt:r:L:o:t:w:T", 
                                    ["help", 
                                     "debug", 
                                     "verbose",
@@ -318,6 +321,7 @@ def main():
                                     "outfile=",
                                     "target=",
                                     "workdir=",
+                                    "tdl"
                                     ])
     except getopt.GetoptError, error:
         print( str(error))
@@ -339,6 +343,8 @@ def main():
             target = arg
         elif opt in ("-w", "--workdir"):
             tempdir = arg               
+        elif opt in ("-T", "--tdl"):
+            tdlonly = 1
     
     major, minor, release, st, num = sys.version_info
     FORMAT24="[ %(levelname)s ] %(asctime)s %(filename)s (Line %(lineno)d): %(message)s"
@@ -383,7 +389,10 @@ def main():
         handle_embedfiles(files)
         make_withfiles(files)
         finaltdl = handle_mergetdls(files)
-        run_imagefactory(finaltdl)
+        if not tdlonly:
+            log.info("Final TDL produced at: %s" % finaltdl)
+            log.debug("TDL only requested. No build.")
+            run_imagefactory(finaltdl)
         
 
 if __name__ == "__main__": 
