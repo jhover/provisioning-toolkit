@@ -35,8 +35,7 @@ for f in filelist:
     s+= " %s " % data['type']
  
     template = data['template']
-    tree = ElementTree.fromstring(template)
-    root = tree.getroot()
+    root = ElementTree.fromstring(template)
     for child in root:
         s += " %s:%s " %(child.tag, child.attrib)
         
