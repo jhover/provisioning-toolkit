@@ -11,20 +11,26 @@ imagedir = "/var/lib/imagefactory/storage"
 import glob
 
 import json
-import os
+from os import path
 from pprint import pprint
 
 #json_file='a.json' 
 filelist = glob.glob("%s/*.meta" % imagedir)
 
 for f in filelist:
+    
+    
     json_data=open(f)
+    ftime = time.ctime(path.getmtime(f))
+    
     data = json.load(json_data)
     json_data.close()
     #pprint(data)
     s = "Image: "
-    s+= data['identifier']
-    s+= data['type']
+    s += " %s " % ftime
+    s+= " %s " % data['identifier']
+    s+= " %s " % data['type']
+   
     template = data['template']
         
     print(s)
