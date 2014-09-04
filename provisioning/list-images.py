@@ -14,6 +14,8 @@ from os import path
 from pprint import pprint
 import time
 import datetime
+from xml.etree import ElementTree
+
 
 #json_file='a.json' 
 filelist = glob.glob("%s/*.meta" % imagedir)
@@ -33,6 +35,10 @@ for f in filelist:
     s+= " %s " % data['type']
  
     template = data['template']
+    tree = ElementTree.fromstring(template)
+    root = tree.getroot()
+    for child in root:
+        s += " %s:%s " %(child.tag, child.attrib)
         
     print(s)
 
