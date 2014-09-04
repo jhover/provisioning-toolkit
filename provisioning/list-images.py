@@ -37,7 +37,10 @@ for f in filelist:
     template = data['template']
     root = ElementTree.fromstring(template)
     for child in root:
-        s += " %s:%s " %(child.tag, child.text)
+        if child.tag == 'name':
+            s += " %s " % child.text.strip()
+            
+        #s += " %s:%s " %(child.tag, child.text)
         
     print(s)
 
