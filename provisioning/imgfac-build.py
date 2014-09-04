@@ -390,10 +390,10 @@ def main():
         make_withfiles(files)
         finaltdl = handle_mergetdls(files)
         if not tdlonly:
+            run_imagefactory(finaltdl)
+        else:
             log.info("Final TDL produced at: %s" % finaltdl)
             log.debug("TDL only requested. No build.")
-            run_imagefactory(finaltdl)
-        
 
 if __name__ == "__main__": 
     main()

@@ -7,7 +7,7 @@ from distutils.core import setup
 
 setup(
     name="provisioning-toolkit",
-    version='0.9.1',
+    version='0.9.2',
     description='Utilities for automating VM management.',
     long_description='''Utilities for automating VM management.''',
     license='GPL',
