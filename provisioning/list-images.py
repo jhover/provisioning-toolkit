@@ -9,10 +9,10 @@ imagedir = "/var/lib/imagefactory/storage"
 #
 
 import glob
-
 import json
 from os import path
 from pprint import pprint
+import time
 
 #json_file='a.json' 
 filelist = glob.glob("%s/*.meta" % imagedir)
