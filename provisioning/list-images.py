@@ -21,8 +21,7 @@ for f in filelist:
     json_data=open(f)
     data = json.load(json_data)
     json_data.close()
-
-pprint(data)
+    pprint(data)
 # print "Dimension: ", data['cubes'][cube]['dim']
 
 
