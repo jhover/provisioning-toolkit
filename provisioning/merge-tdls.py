@@ -34,9 +34,12 @@ def mergefiles(files):
             root = tree.getroot()
             first = root
         else:
-            root = ElementTree.parse(filename).getroot()
-            mergetree(tree.getroot(), root)
+            second = ElementTree.parse(filename).getroot()
+            mergetree(first, second)
     return tree
+
+
+
 
 def mergetree(first, second):
     if first.tag != second.tag:
@@ -45,12 +48,14 @@ def mergetree(first, second):
         log.debug("Tags equal: %s == %s" % (first.tag, second.tag))
         if first.text != second.text:
             #
-            # Handle template name via concatenation, not replacement. 
+            # Handle template name via concatenation, not replacement, whenever the 
+            # string is different. 
             #
-            if first.tag == "name":
+            if first.tag.strip() == "name":
+                log.debug("Found different 'name' tag. Concatenating.")
                 first.text = "%s-%s" % (first.text, second.text)
-            first.text = second.text
-
+            else:
+                first.text = second.text
 
     firsttags = []
     # Handle look for second children that have same tag, but no attributes, 
