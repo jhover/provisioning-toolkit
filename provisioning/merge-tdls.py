@@ -44,6 +44,11 @@ def mergetree(first, second):
     else:
         log.debug("Tags equal: %s == %s" % (first.tag, second.tag))
         if first.text != second.text:
+            #
+            # Handle template name via concatenation, not replacement. 
+            #
+            if first.tag == "name":
+                first.text = "%s-%s" % (first.text, second.text)
             first.text = second.text
 
 
