@@ -1,7 +1,5 @@
 #!/bin/env python
-#
-#
-# Top level build tool
+# Top level Imagefactory build tool
 #
 # imgfac-build  TDL_FILE  [ TDL_FILE ]
 #
@@ -29,16 +27,6 @@
 #    --file /home/imagefactory/lib/storage/7260bef6-3409-4d22-8211-a4e91072d7c0.body 
 #    --is-public False
 #
-#  os.path.exists()
-#
-#  p = subprocess.Popen(querycmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)     
-#  out = None
-#  (out, err) = p.communicate()
-#  log.debug('querycondor: it took %s seconds to perform the query' %delta)
-#  log.debug('out = %s' % out)
-#  os.path.realpath(path)
-#
-
 
 
 from __future__ import print_function
