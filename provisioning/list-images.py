@@ -30,6 +30,14 @@ for f in filelist:
     s = "Image: "
     s += " %s " % ftime
     s+= " %s " % data['identifier']
+    
+    template = data['template']
+    if template:
+        root = ElementTree.fromstring(template)
+        for child in root:
+            if child.tag == 'name':
+                s += " %s " % child.text.strip()
+    
     s+= " %s " % data['type']
     t = data['type']
     if t == "target":
@@ -38,14 +46,8 @@ for f in filelist:
         s+= " %s " % data['provider']
         s+= " %s " % data['identifier_on_provider']
       
-        
- 
-    template = data['template']
-    if template:
-        root = ElementTree.fromstring(template)
-        for child in root:
-            if child.tag == 'name':
-                s += " %s " % child.text.strip()
+    
+
     print(s)
 
 
