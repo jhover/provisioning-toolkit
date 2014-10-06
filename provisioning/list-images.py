@@ -20,9 +20,7 @@ from xml.etree import ElementTree
 #json_file='a.json' 
 filelist = glob.glob("%s/*.meta" % imagedir)
 
-for f in filelist:
-    
-    
+for f in filelist:   
     json_data=open(f)
     t = path.getmtime(f)
     ftime = datetime.datetime.fromtimestamp(t)
@@ -33,6 +31,14 @@ for f in filelist:
     s += " %s " % ftime
     s+= " %s " % data['identifier']
     s+= " %s " % data['type']
+    t = data['type']
+    if t == "target":
+        s+= " %s " % data['target']
+    elif t == "provider":
+        s+= " %s " % data['provider']
+        s+= " %s " % data['identifier_on_provider']
+      
+        
  
     template = data['template']
     if template:
