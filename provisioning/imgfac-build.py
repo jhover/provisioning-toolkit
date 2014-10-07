@@ -1,5 +1,7 @@
 #!/bin/env python
-# Top level Imagefactory build tool
+#
+#
+# Top level build tool
 #
 # imgfac-build  TDL_FILE  [ TDL_FILE ]
 #
@@ -27,6 +29,16 @@
 #    --file /home/imagefactory/lib/storage/7260bef6-3409-4d22-8211-a4e91072d7c0.body 
 #    --is-public False
 #
+#  os.path.exists()
+#
+#  p = subprocess.Popen(querycmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)     
+#  out = None
+#  (out, err) = p.communicate()
+#  self.log.debug('querycondor: it took %s seconds to perform the query' %delta)
+#  self.log.debug('out = %s' % out)
+#  os.path.realpath(path)
+#
+
 
 
 from __future__ import print_function
@@ -40,168 +52,221 @@ import subprocess
 import time
 
 
-
-def handle_embedfiles(files):
-    '''
-    Takes a files.yaml file for each name and creates a files.tdl for later merging. 
-    '''
-    for f in files:
-        name = getname(f)
-        ext = getext(f)
-        p = getpathdir(f)
-        log.info("Embedding files. Handling %s" % f)
-        log.debug("Handling path=%s name=%s ext=%s" % (p, name, ext))
-        yamlfile = "%s.files.yaml" % name
-        log.debug("yamlfile=%s" % yamlfile )
-        yfp = "%s/%s" % (p, yamlfile)
-        log.debug("checking if %s exists..." % yfp  ) 
-        destname = "%s/%s.files.tdl" % (tempdir,name)
-        if os.path.exists(yfp):
-            log.debug("yep. running embed_files...")
-            cmd = "embed-files -o %s --fileroot %s %s " % ( destname, fileroot, yfp)
-            log.debug("command: %s" % cmd)
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-            (out, err) = p.communicate()
-            log.debug('out = %s' % out)
-            log.debug('err = %s' % err)
+class ImgFacBuild(object):
+    
+    def __init__(self, config, profile):
+        self.log = logging.getLogger()
+        self.config = config
+        self.profile = profile
+        self.tdlonly = config.get(profile,'tdlonly')
+        
+        
+    def build(self, files):
+        if files:
+            handle_embedfiles(files)
+            make_withfiles(files)
+            finaltdl = handle_mergetdls(files)
+        if not tdlonly:
+            run_imagefactory(finaltdl)
         else:
-            log.debug("No <name>.files.yaml file so doing nothing.")
+            self.log.info("Final TDL produced at: %s" % finaltdl)
+            self.log.debug("TDL only requested. No build.")
 
-def make_withfiles(files):
-    '''
-    Combine all <name>.files.tdl and <name>.tdl files into <name>.withfiles.tdl
+
+    def handle_embedfiles(self, files):
         '''
-    for f in files:
-        name = getname(f)
-        ext = getext(f)
-        p = getpathdir(f)
-        log.info("Handling %s" % f)                  
-        log.debug("Handling path=%s name=%s ext=%s" % (p, name, ext))
-        wfp = "%s/%s.files.tdl" % (tempdir,name)
-        destname = "%s/%s.withfiles.tdl" % (tempdir,name)
-        if os.path.exists(wfp):
-            log.debug("yep. running merge-tdls...")
-            cmd = "merge-tdls -o %s %s %s " % ( destname, f, wfp )
-            log.debug("command= %s" % cmd)
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-            (out, err) = p.communicate()
-            log.debug('out = %s' % out)
-            log.debug('err = %s' % err)
-        else:
-            log.debug("No <name>.files.tdl so copying <name>.tdl to <name>.withfiles.tdl...")
-            shutil.copy(f, destname)
-            log.debug("copied %s -> %s" % (f,destname))
-
-
-def handle_mergetdls(files):
-    '''
-    Combine all <name>.withfiles.tdl into final tdl named
-      <name1>-<name2>-<nameN>.tdl
-    Return name of final tdl file path. 
-    '''
-    withfiles = []
-    destname = ""
-    for f in files:
-        name = getname(f)
-        ext = getext(f)
-        p = getpathdir(f) 
-        log.info("Handling %s" % f)
-        wfp = "%s/%s.withfiles.tdl" % (tempdir,name)
-        withfiles.append(wfp)
-        if destname == "":
-            destname = "%s" % name
-        else:
-            destname = "%s-%s" % (destname, name)
+        Takes a files.yaml file for each name and creates a files.tdl for later merging. 
+        '''
+        for f in files:
+            name = getname(f)
+            ext = getext(f)
+            p = getpathdir(f)
+            self.log.info("Embedding files. Handling %s" % f)
+            self.log.debug("Handling path=%s name=%s ext=%s" % (p, name, ext))
+            yamlfile = "%s.files.yaml" % name
+            self.log.debug("yamlfile=%s" % yamlfile )
+            yfp = "%s/%s" % (p, yamlfile)
+            self.log.debug("checking if %s exists..." % yfp  ) 
+            destname = "%s/%s.files.tdl" % (tempdir,name)
+            if os.path.exists(yfp):
+                self.log.debug("yep. running embed_files...")
+                cmd = "embed-files -o %s --fileroot %s %s " % ( destname, fileroot, yfp)
+                self.log.debug("command: %s" % cmd)
+                p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+                (out, err) = p.communicate()
+                self.log.debug('out = %s' % out)
+                self.log.debug('err = %s' % err)
+            else:
+                self.log.debug("No <name>.files.yaml file so doing nothing.")
     
-    log.debug("withfiles is %s" % withfiles)
-    allfiles = " ".join(withfiles)
-    cmd = "merge-tdls -o %s/%s.tdl %s" % (tempdir, destname, allfiles )
-    log.debug("command= %s" % cmd)
-    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-    (out, err) = p.communicate()
-    log.debug('err = %s' % err)
-    log.debug('out = %s' % out)
-    retval = "%s/%s.tdl" % (tempdir, destname)
-    log.debug('returning %s'% retval)
-    return retval
-
-
-def run_imagefactory(tdlfile):
-    log.info("Running imagefactory base...")
-    (status, uuid) = run_imagefactory_base(tdlfile)
-    log.info("Ran imagefactory base...") 
-    if uuid is not None and target is not None:
-        (status,uuid) = run_imagefactory_target(uuid, target)
-    log.info("Ran imagefactory target...")
-
-def run_imagefactory_base(tdlfile):
-    '''
-out:    
-============ Final Image Details ============
-UUID: aee9b860-c067-4ad8-8622-55a785dd96f4
-Type: target_image
-Status: COMPLETE
-Status Details: {'error': None, 'activity': 'Target Image build complete'}
-   
-    '''
-    cmd = "time imagefactory --debug base_image %s " % (tdlfile)
-    log.info("Running imagefactory: '%s'" % cmd)
-    log.debug("cmd is %s" % cmd)
-    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-    sec = 0
-    retcode = None
-    INTERVAL = 30
-    while retcode is None:
-        retcode = p.poll()
-        time.sleep(INTERVAL)
-        sec = sec + INTERVAL
-        if sec < 60:        
-            log.debug("%s seconds elapsed..." % sec)
-        else:
-            min =  sec / 60
-            secmod = sec % 60
-            log.debug("%s min %s sec elapsed..." % (min, secmod))
-            if min % 3  == 0 and secmod == 0:
-                log.info("Running. %s minutes elapsed..." % min)  
-    (out, err) = p.communicate()
-    log.debug('out = %s' % out)
-    log.debug('err = %s' % err)
-    (status, uuid) = parse_imagefactory_return(out)
-    return (status,uuid)
+    def make_withfiles(self, files):
+        '''
+        Combine all <name>.files.tdl and <name>.tdl files into <name>.withfiles.tdl
+            '''
+        for f in files:
+            name = getname(f)
+            ext = getext(f)
+            p = getpathdir(f)
+            self.log.info("Handling %s" % f)                  
+            self.log.debug("Handling path=%s name=%s ext=%s" % (p, name, ext))
+            wfp = "%s/%s.files.tdl" % (tempdir,name)
+            destname = "%s/%s.withfiles.tdl" % (tempdir,name)
+            if os.path.exists(wfp):
+                self.log.debug("yep. running merge-tdls...")
+                cmd = "merge-tdls -o %s %s %s " % ( destname, f, wfp )
+                self.log.debug("command= %s" % cmd)
+                p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+                (out, err) = p.communicate()
+                self.log.debug('out = %s' % out)
+                self.log.debug('err = %s' % err)
+            else:
+                self.log.debug("No <name>.files.tdl so copying <name>.tdl to <name>.withfiles.tdl...")
+                shutil.copy(f, destname)
+                self.log.debug("copied %s -> %s" % (f,destname))
     
-
-def run_imagefactory_target(uuid):
-    cmd = "time imagefactory --debug target_image --id %s %s " % (uuid, target)
-    log.info("Running imagefactory: '%s'" % cmd)
-    log.debug("cmd is %s" % cmd)
-    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-    sec = 0
-    retcode = None
-    INTERVAL = 30
-    while retcode is None:
-        retcode = p.poll()
-        time.sleep(INTERVAL)
-        sec = sec + INTERVAL
-        if sec < 60:        
-            log.debug("%s seconds elapsed..." % sec)
-        else:
-            min =  sec / 60
-            secmod = sec % 60
-            log.debug("%s min %s sec elapsed..." % (min, secmod))
-            if min % 3  == 0 and secmod == 0:
-                log.info("Running. %s minutes elapsed..." % min)  
-    (out, err) = p.communicate()
-    log.debug('out = %s' % out)
-    log.debug('err = %s' % err)
-    (status, uuid) = parse_imagefactory_return(out)
     
-    if status is not None: 
-        if target == 'openstack-kvm':
-            print("glance --verbose image-create --name name --disk-format raw --container-format bare --file /home/imagefactory/lib/storage/%s.body --is-public False" % uuid)
-        elif target == 'ec2':
-            print("imagefactory provider_image --id %s ec2 @us-east-1 ec2_credentials.xml" % uuid)
-    else:
-        log.warning("imagefactory had error: %s" % err)
+    def handle_mergetdls(self, files):
+        '''
+        Combine all <name>.withfiles.tdl into final tdl named
+          <name1>-<name2>-<nameN>.tdl
+        Return name of final tdl file path. 
+        '''
+        withfiles = []
+        destname = ""
+        for f in files:
+            name = getname(f)
+            ext = getext(f)
+            p = getpathdir(f) 
+            self.log.info("Handling %s" % f)
+            wfp = "%s/%s.withfiles.tdl" % (tempdir,name)
+            withfiles.append(wfp)
+            if destname == "":
+                destname = "%s" % name
+            else:
+                destname = "%s-%s" % (destname, name)
+        
+        self.log.debug("withfiles is %s" % withfiles)
+        allfiles = " ".join(withfiles)
+        cmd = "merge-tdls -o %s/%s.tdl %s" % (tempdir, destname, allfiles )
+        self.log.debug("command= %s" % cmd)
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        (out, err) = p.communicate()
+        self.log.debug('err = %s' % err)
+        self.log.debug('out = %s' % out)
+        retval = "%s/%s.tdl" % (tempdir, destname)
+        self.log.debug('returning %s'% retval)
+        return retval
+    
+    
+    def run_imagefactory(self, tdlfile):
+        self.log.info("Running imagefactory base...")
+        (status, uuid) = run_imagefactory_base(tdlfile)
+        self.log.info("Ran imagefactory base...") 
+        if uuid is not None and target is not None:
+            (status,uuid) = run_imagefactory_target(uuid, target)
+        self.log.info("Ran imagefactory target...")
+    
+    def run_imagefactory_base(self, tdlfile):
+        '''
+    out:    
+    ============ Final Image Details ============
+    UUID: aee9b860-c067-4ad8-8622-55a785dd96f4
+    Type: target_image
+    Status: COMPLETE
+    Status Details: {'error': None, 'activity': 'Target Image build complete'}
+       
+        '''
+        cmd = "time imagefactory --debug base_image %s " % (tdlfile)
+        self.log.info("Running imagefactory: '%s'" % cmd)
+        self.log.debug("cmd is %s" % cmd)
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        sec = 0
+        retcode = None
+        INTERVAL = 30
+        while retcode is None:
+            retcode = p.poll()
+            time.sleep(INTERVAL)
+            sec = sec + INTERVAL
+            if sec < 60:        
+                self.log.debug("%s seconds elapsed..." % sec)
+            else:
+                min =  sec / 60
+                secmod = sec % 60
+                self.log.debug("%s min %s sec elapsed..." % (min, secmod))
+                if min % 3  == 0 and secmod == 0:
+                    self.log.info("Running. %s minutes elapsed..." % min)  
+        (out, err) = p.communicate()
+        self.log.debug('out = %s' % out)
+        self.log.debug('err = %s' % err)
+        (status, uuid) = parse_imagefactory_return(out)
+        return (status,uuid)
+        
+    
+    def run_imagefactory_target(self, uuid):
+        cmd = "time imagefactory --debug target_image --id %s %s " % (uuid, target)
+        self.log.info("Running imagefactory: '%s'" % cmd)
+        self.log.debug("cmd is %s" % cmd)
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        sec = 0
+        retcode = None
+        INTERVAL = 30
+        while retcode is None:
+            retcode = p.poll()
+            time.sleep(INTERVAL)
+            sec = sec + INTERVAL
+            if sec < 60:        
+                self.log.debug("%s seconds elapsed..." % sec)
+            else:
+                min =  sec / 60
+                secmod = sec % 60
+                self.log.debug("%s min %s sec elapsed..." % (min, secmod))
+                if min % 3  == 0 and secmod == 0:
+                    self.log.info("Running. %s minutes elapsed..." % min)  
+        (out, err) = p.communicate()
+        self.log.debug('out = %s' % out)
+        self.log.debug('err = %s' % err)
+        (status, uuid) = parse_imagefactory_return(out)
+        
+        if status is not None: 
+            if target == 'openstack-kvm':
+                print("glance --verbose image-create --name name --disk-format raw --container-format bare --file /home/imagefactory/lib/storage/%s.body --is-public False" % uuid)
+            elif target == 'ec2':
+                print("imagefactory provider_image --id %s ec2 @us-east-1 ec2_credentials.xml" % uuid)
+        else:
+            self.log.warning("imagefactory had error: %s" % err)
+
+    def run_imagefactory_provider(self, uuid):
+        cmd = "time imagefactory --%s provider_image --id %s %s " % (self.loglevel, uuid, self.target, self.credential)
+        self.log.info("Running imagefactory: '%s'" % cmd)
+        self.log.debug("cmd is %s" % cmd)
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        sec = 0
+        retcode = None
+        INTERVAL = 30
+        while retcode is None:
+            retcode = p.poll()
+            time.sleep(INTERVAL)
+            sec = sec + INTERVAL
+            if sec < 60:        
+                self.log.debug("%s seconds elapsed..." % sec)
+            else:
+                min =  sec / 60
+                secmod = sec % 60
+                self.log.debug("%s min %s sec elapsed..." % (min, secmod))
+                if min % 3  == 0 and secmod == 0:
+                    self.log.info("Running. %s minutes elapsed..." % min)  
+        (out, err) = p.communicate()
+        self.log.debug('out = %s' % out)
+        self.log.debug('err = %s' % err)
+        (status, uuid) = parse_imagefactory_return(out)
+        
+        if status is not None: 
+            if target == 'openstack-kvm':
+                print("glance --verbose image-create --name name --disk-format raw --container-format bare --file /home/imagefactory/lib/storage/%s.body --is-public False" % uuid)
+            elif target == 'ec2':
+                print("imagefactory provider_image --id %s ec2 @us-east-1 ec2_credentials.xml" % uuid)
+        else:
+            self.log.warning("imagefactory had error: %s" % err)
 
 
 def parse_imagefactory_return(text):
@@ -209,7 +274,7 @@ def parse_imagefactory_return(text):
     status = None
     buf = StringIO.StringIO(text)
     for line in buf.readlines():
-        #log.debug("line is %s" % line)
+        #self.log.debug("line is %s" % line)
         h1 = line[:4]
         #print("h1 is '%s'" % h1)
         if h1 == 'UUID':
@@ -230,10 +295,10 @@ def parse_imagefactory_return(text):
                 pass
                 #print("%s != %s" % (s,'COMPLETE'))
     if uuid is not None and status is not None:
-        log.info("Parsed UUID: %s" % uuid)
+        self.log.info("Parsed UUID: %s" % uuid)
         return (status, uuid)
     else:
-        log.error("failed to parse UUID from text: %s" % text)
+        self.log.error("failed to parse UUID from text: %s" % text)
         return (None, None)
    
 
@@ -279,6 +344,9 @@ def main():
     outfile = sys.stdout
     tempdir = os.path.expanduser("~/tmp")
     target = None
+    config_file = None
+    default_configfile = os.path.expanduser("~/etc/imgfac.conf")
+    profile = None
     
     usage = """Usage: imgfac-build.py [OPTIONS] TDL  [TDL2  FILE3 ] 
    merge-tdls takes multiple TDLs and merges them, with later TDLs overriding earlier ones. 
@@ -286,30 +354,36 @@ def main():
         -h --help                   Print this message
         -d --debug                  Debug messages
         -v --verbose                Verbose messages
+        -c --config                 Config file [~/.provisioning/imfac.conf]
         -L --logfile                STDERR
-        -r --fileroot               <working directory>
+        -l --list                   List available builds.
+        -r --fileroot               [working directory]
         -V --version                Print program version and exit.
         -o --outfile                STDOUT
         -t --target                 Output format [openstack-kvm|ec2] 
         -w --workdir                Temporary workdir [~/tmp]
         -T --tdlonly                Just create TDL, do not build. 
+        -p --profile                Config section to determine action
+
      """
 
     # Handle command line options
     argv = sys.argv[1:]
     try:
         opts, args = getopt.getopt(argv, 
-                                   "hdvt:r:L:o:t:w:T", 
+                                   "hdvc:t:r:L:o:t:w:Tp:", 
                                    ["help", 
                                     "debug", 
                                     "verbose",
+                                    "config=",
                                     "tempdir=",
                                     "fileroot=",
                                     "logfile=",
                                     "outfile=",
                                     "target=",
                                     "workdir=",
-                                    "tdl"
+                                    "tdl",
+                                    "profile",
                                     ])
     except getopt.GetoptError, error:
         print( str(error))
@@ -323,16 +397,25 @@ def main():
             debug = 1
         elif opt in ("-v", "--verbose"):
             info = 1
+        elif opt in ("-c", "--config"):
+            config_file = arg
         elif opt in ("-L","--logfile"):
             logfile = arg
         elif opt in ("-r","--fileroot"):
             fileroot = arg
-        elif opt in ("-t", "--target"):
-            target = arg
         elif opt in ("-w", "--workdir"):
             tempdir = arg               
         elif opt in ("-T", "--tdl"):
             tdlonly = 1
+        elif opt in ("-p", "--profile"):
+            profile = arg
+
+    # Read in config file
+    cp=ConfigParser()
+    if not config_file:
+        config_file = default_configfile
+    got_config = cp.read(config_file)
+
     
     major, minor, release, st, num = sys.version_info
     FORMAT24="[ %(levelname)s ] %(asctime)s %(filename)s (Line %(lineno)d): %(message)s"
@@ -373,15 +456,11 @@ def main():
     files = args
     log.debug(files)
 
-    if files:
-        handle_embedfiles(files)
-        make_withfiles(files)
-        finaltdl = handle_mergetdls(files)
-        if not tdlonly:
-            run_imagefactory(finaltdl)
-        else:
-            log.info("Final TDL produced at: %s" % finaltdl)
-            log.debug("TDL only requested. No build.")
+    
+
+    ifb = ImgFacBuild(config, )
+
+
 
 if __name__ == "__main__": 
     main()

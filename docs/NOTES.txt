@@ -5,7 +5,6 @@ Input:
   .tdl snippets that get combined into base_image TDLs. 
     
 
-
 COMMANDS
 
 imagefactory --verbose target_image --template sl6.4.minimal.tdl openstack-kvm

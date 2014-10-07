@@ -1,0 +1,10 @@
+{
+ "glance-host": "cldext01.usatlas.bnl.gov",
+ "glance-port": 9292,
+ "name": "Hover ImageFactory",
+ "min_ram": 2048,
+ "properties": {
+    "hypervisor_type": "kvm",
+    "os": "LINUX"
+  }
+}

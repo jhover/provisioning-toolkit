@@ -40,9 +40,9 @@ for f in filelist:
     
     s+= " %s " % data['type']
     t = data['type']
-    if t == "target":
+    if t == "TargetImage":
         s+= " %s " % data['target']
-    elif t == "provider":
+    elif t == "ProviderImage":
         s+= " %s " % data['provider']
         s+= " %s " % data['identifier_on_provider']
       
