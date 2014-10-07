@@ -411,10 +411,10 @@ def main():
             profile = arg
 
     # Read in config file
-    cp=ConfigParser()
+    config=ConfigParser()
     if not config_file:
         config_file = default_configfile
-    got_config = cp.read(config_file)
+    got_config = config.read(config_file)
 
     
     major, minor, release, st, num = sys.version_info
@@ -453,12 +453,21 @@ def main():
         log.setLevel(logging.INFO) # Override with command line switches
     
     log.debug("%s" %sys.argv)
-    files = args
-    log.debug(files)
-
-    
-
-    ifb = ImgFacBuild(config, )
+    if profile:
+        log.info("profile %s specified" % profile)
+    else:
+        profile = 'adhoc'
+        files = args
+        log.debug("files are %s" % files)
+        config.add_section(profile)
+        #
+        # workdir fileroot templates
+        #
+        #
+        config.set(profile, 'workdir', '15')
+        #config.
+  
+    ifb = ImgFacBuild(config, profile)
 
 
 
