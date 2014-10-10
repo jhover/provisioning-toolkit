@@ -15,28 +15,12 @@
 # It then runs merge-tdls against all <filename>.withfiles.tdl in order, with later TDLs overriding earlier where
 # there are collisions. Latter TDLs override equivalent content in earlier TDLs. 
 #
-# It then runs 
-# imagefactory 
-#   --verbose target_image 
-#   --template work/sl6-x86_64-base-batch-osg-atlas.tdl openstack-kvm
 #
-# captures the resulting UUID of the build, then uploads using glance:
-# 
-# glance image-create 
-#    --name sl6-x86_64-wn-atlas 
-#    --disk-format raw 
-#    --container-format bare 
-#    --file /home/imagefactory/lib/storage/7260bef6-3409-4d22-8211-a4e91072d7c0.body 
-#    --is-public False
-#
-#  os.path.exists()
-#
-#  p = subprocess.Popen(querycmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)     
-#  out = None
-#  (out, err) = p.communicate()
-#  self.log.debug('querycondor: it took %s seconds to perform the query' %delta)
-#  self.log.debug('out = %s' % out)
-#  os.path.realpath(path)
+# Either specify 
+#    -c <configfile> -p <profilename>
+#  OR  
+# tempdir fileroot workdir [target|provider] TDL1 TDL2 TDL3 ....
+#    -    
 #
 
 

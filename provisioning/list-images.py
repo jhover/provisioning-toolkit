@@ -45,8 +45,6 @@ for f in filelist:
     elif t == "ProviderImage":
         s+= " %s " % data['provider']
         s+= " %s " % data['identifier_on_provider']
-      
-    
 
     print(s)
 
