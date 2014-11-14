@@ -1,0 +1,17 @@
+imgfac-build
+
+Execute with one or more TDL files. 
+ 
+For each <filename>.tdl checks to see if there is a <filename>.files.yaml
+If so, it runs embed-files against the yaml, creating <filename>.files.tdl 
+
+It then runs merge-tdl agains each <filename>.tdl and <filename>.files.tdl to produce <filename>.withfiles.tdl
+
+It then runs merge-tdls against all <filename>.withfiles.tdl in order, with later TDLs overriding earlier where
+there are collisions. Latter TDLs override equivalent content in earlier TDLs. 
+
+ Either specify 
+   -c <configfile> -p <profilename>
+  OR  
+ tempdir fileroot workdir [target|provider] TDL1 TDL2 TDL3 ....
+    -    
