@@ -24,7 +24,6 @@
 #
 
 
-
 from __future__ import print_function
 import getopt
 import logging
@@ -34,7 +33,7 @@ import StringIO
 import sys
 import subprocess
 import time
-
+from ConfigParser import ConfigParser
 
 class ImgFacBuild(object):
     
