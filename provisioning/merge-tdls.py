@@ -90,7 +90,7 @@ class MergeTDLs(object):
                 found = False
                 toadd.append(secondchild)
                 for firstchild in first:
-                    if eq_elements(firstchild, secondchild):
+                    if self.eq_elements(firstchild, secondchild):
                         found = True
                         toremove.append(firstchild)
             
