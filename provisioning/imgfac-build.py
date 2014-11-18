@@ -296,7 +296,7 @@ def checkext(filename, ext):
 def main():
     
     global log
-    global tempdir
+    global workdir
     global fileroot
     global target
     global tdlonly 
@@ -307,7 +307,7 @@ def main():
     tdlonly = 0
     logfile = sys.stderr
     outfile = sys.stdout
-    tempdir = os.path.expanduser("~/tmp")
+    workdir = os.path.expanduser("~/tmp")
     target = None
     config_file = None
     default_configfile = os.path.expanduser("~/etc/imgfac.conf")
@@ -369,7 +369,7 @@ def main():
         elif opt in ("-r","--fileroot"):
             fileroot = arg
         elif opt in ("-w", "--workdir"):
-            tempdir = arg               
+            workdir = arg               
         elif opt in ("-T", "--tdl"):
             tdlonly = 1
         elif opt in ("-p", "--profile"):
@@ -436,7 +436,7 @@ def main():
         files = args
         log.debug("files are %s" % files)
         config.add_section(profile)
-        config.set(profile, 'workdir', tmpdir )
+        config.set(profile, 'workdir', workdir )
         if tdlonly:
             config.set(profile, 'tdlonly', True)
         else:
