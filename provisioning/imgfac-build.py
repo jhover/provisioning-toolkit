@@ -444,7 +444,8 @@ def main():
         config.set(profile, 'fileroot', fileroot )
         s = "[%s]" % profile
         for option in config.options(profile):
-            s+= " %s=%s " % ( option, config.get(profile, option))
+            val = config.get(profile, option)
+            s+= " %s=%s " % ( option, val )
         log.debug(s) 
     ifb = ImgFacBuild(config, profile)
 
