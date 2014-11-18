@@ -238,11 +238,11 @@ class MergeTDLsCLI(object):
             hdlr.setFormatter(formatter)
             self.log.addHandler(hdlr)
     
-        if warn:
+        if self.warn:
             self.log.setLevel(logging.WARN)
-        if debug: 
+        if self.debug: 
             self.log.setLevel(logging.DEBUG) # Override with command line switches
-        if info:
+        if self.info:
             self.log.setLevel(logging.INFO) # Override with command line switches
         
         self.log.debug("%s" %sys.argv)
