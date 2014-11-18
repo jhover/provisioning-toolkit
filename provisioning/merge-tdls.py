@@ -30,7 +30,7 @@ class MergeTDLs(object):
             root = ElementTree.parse(filename).getroot() 
             self.printelements(root)
         self.log.debug("Merging files ***********************************" % files)
-        merged = mergefiles(files)
+        merged = mergefiles(self.files)
         self.log.debug("Printing merged structure ***********************************")
         if self.log.isEnabledFor( logging.DEBUG):
             self.printelements(merged.getroot())
