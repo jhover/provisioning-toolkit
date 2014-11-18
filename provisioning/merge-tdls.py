@@ -51,7 +51,7 @@ class MergeTDLs(object):
                 first = root
             else:
                 second = ElementTree.parse(filename).getroot()
-                mergetree(first, second)
+                self.mergetree(first, second)
         return tree
     
     def mergetree(self, first, second):
@@ -77,7 +77,7 @@ class MergeTDLs(object):
                 if secondchild.tag == firstchild.tag:
                     if not firstchild.attrib and not secondchild.attrib:
                         # for attribute-less elements, we can simple descend
-                        mergetree(firstchild, secondchild)
+                        self.mergetree(firstchild, secondchild)
     
         # For elements with same tags, but having attributes, we need to 
         # handle them more carefully,since there may be multiple children with the same tag 
