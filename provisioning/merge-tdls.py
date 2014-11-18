@@ -251,7 +251,7 @@ class MergeTDLsCLI(object):
     
         if files:
             self.mt = MergeTDLs(files)
-            self.mt.handlefiles(files, outfile )
+            self.mt.handlefiles()
 #
 #    Functions
 #
