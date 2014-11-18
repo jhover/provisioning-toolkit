@@ -438,9 +438,9 @@ def main():
         config.add_section(profile)
         config.set(profile, 'workdir', workdir )
         if tdlonly:
-            config.set(profile, 'tdlonly', True)
+            config.set(profile, 'tdlonly', "True")
         else:
-            config.set(profile, 'tdlonly', False)
+            config.set(profile, 'tdlonly', "False")
         config.set(profile, 'fileroot', fileroot )
         s = "[%s]" % profile
         for option in config.options(profile):
