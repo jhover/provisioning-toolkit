@@ -421,17 +421,31 @@ def main():
     if profile:
         log.info("profile %s specified" % profile)
     else:
+        '''
+        [adhoc]
+        workdir=
+        tdlonly=
+        fileroot=
+        target=
+        credentials=
+        provider=
+        templates=
+        
+        '''
         profile = 'adhoc'
         files = args
         log.debug("files are %s" % files)
         config.add_section(profile)
-        #
-        # workdir fileroot templates
-        #
-        #
-        config.set(profile, 'workdir', '15')
-        #config.
-  
+        config.set(profile, 'workdir', tmpdir )
+        if tdlonly:
+            config.set(profile, 'tdlonly', True)
+        else:
+            config.set(profile, 'tdlonly', False)
+        config.set(profile, 'fileroot', fileroot )
+        s = "[%s]" % profile
+        for option in config.options(profile):
+            s+= " %s=%s " % ( option, config.get(profile, option))
+        log.debug(s) 
     ifb = ImgFacBuild(config, profile)
 
 

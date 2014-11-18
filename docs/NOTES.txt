@@ -3,7 +3,7 @@ SYSTEM DESIGN
 Input:
   
   .tdl snippets that get combined into base_image TDLs. 
-    
+   
 
 COMMANDS
 
@@ -32,4 +32,29 @@ OSG SYSTEM CONSIDERATIONS
 -- at large scale you do not want VMs booting and performing package installation or complex configuration. you want the node type to already be determined, and only critical info (condor CM, condor shared password, http proxy host) passed through via userdata. 
 
 
--- OSG wants to support standard images (a la CERNVM) which can be pointed to by URL in a job.  
+-- OSG wants to support standard images (a la CERNVM) which can be pointed to by URL in a job. 
+
+
+
+GLITCHES/ISSUES
+
+fighting internal imagefactory plugin efforts.
+
+-- selinux
+  dynamically set to permissive via echo 1>/selinux/enabled
+-- /root/.ssh/authorized_keys
+  special boot script to fix it up if keys ar emissing
+-- /etc/ssh/sshd_config
+  force overwrite and sshd restart
+
+file ownership and permissions
+-- /etc/condor/config.d/*
+-- /usr/libexec/jobwrapper.sh  (+x)
+-- /etc/profile.d/*.sh
+
+
+
+
+
+
+ 
