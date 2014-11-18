@@ -24,14 +24,14 @@ class MergeTDLs(object):
 
     def handlefiles(self):
         if self.outfile != sys.stdout:
-                ensurefile(outfile, clear=True)
-        for filename in files:
-            self.log.debug("Processing file %s ***********************************" % filename)
+                ensurefile(self.outfile, clear=True)
+        for filename in self.files:
+            self.log.debug("Processing file %s *******************" % filename)
             root = ElementTree.parse(filename).getroot() 
             self.printelements(root)
-        self.log.debug("Merging files ***********************************" % files)
+        self.log.debug("Merging files *******************" % self.files)
         merged = mergefiles(self.files)
-        self.log.debug("Printing merged structure ***********************************")
+        self.log.debug("Printing merged structure *******************")
         if self.log.isEnabledFor( logging.DEBUG):
             self.printelements(merged.getroot())
         self.log.debug(merged)
@@ -40,10 +40,10 @@ class MergeTDLs(object):
         merged.write(self.outfile)
         self.outfile.close()
 
-    def mergefiles(self,files):
+    def mergefiles(self, files):
         first = None
         tree = None
-        for filename in self.files:
+        for filename in files:
             self.log.debug("Processing file %s" % filename)
             if first is None:
                 tree = ElementTree.parse(filename)
