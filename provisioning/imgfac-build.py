@@ -226,7 +226,8 @@ class ImgFacBuild(object):
         cmd += " %s " % teeout
         self.log.info("Output from subcommand is in %s" % tmpout)
         self.log.debug("cmd is %s" % cmd)
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        #p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        p = subprocess.Popen(cmd, stdout=tfd, stderr=subprocess.PIPE, shell=True)
         sec = 0
         retcode = None
         INTERVAL = 30
