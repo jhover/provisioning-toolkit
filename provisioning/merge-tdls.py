@@ -253,13 +253,13 @@ class MergeTDLsCLI(object):
         
         self.log.debug("Outfile: %s" % self.outfile)
         self.log.debug("Logfile: %s" % self.logfile)
-        files = args
+        self.files = args
         self.log.debug("Files: %s " % files)
         self.log.info("CLI init complete.")
 
     def execute(self): 
-        if files:
-            self.mt = MergeTDLs(files)
+        if self.files:
+            self.mt = MergeTDLs(self.files, outfile= self.outfile)
             self.mt.handlefiles()
         else:
             print( self.usage )                          
