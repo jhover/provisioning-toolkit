@@ -45,6 +45,7 @@ class ImgFacBuild(object):
         self.tdlonly = config.get(profile,'tdlonly')
         self.files = config.get(profile, 'templates')
         self.workdir = os.path.expanduser(config.get(profile,'workdir'))
+        self.fileroot = os.path.expanduser(config.get(profile,'fileroot'))
         self.target = config.get(profile, 'target')
         self.provider = config.get(profile,'provider')
         self.credentials = os.path.expanduser(config.get(profile, 'credentials'))
@@ -461,8 +462,8 @@ def main():
         tdlonly=
         fileroot=
         target=
-        credentials=
         provider=
+        credentials=
         templates=
         
         '''
