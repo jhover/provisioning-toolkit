@@ -17,6 +17,25 @@ import subprocess
 import time
 from ConfigParser import ConfigParser
 
+class ImgfacBuildBaseException(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+
+class ImgfacBuildTargetException(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+
+class ImgfacBuildProviderException(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+
+
 class ImgFacBuild(object):
     
     def __init__(self, config, profile):
@@ -26,6 +45,10 @@ class ImgFacBuild(object):
         self.tdlonly = config.get(profile,'tdlonly')
         self.files = config.get(profile, 'templates')
         self.workdir = os.path.expanduser(config.get(profile,'workdir'))
+        self.target = config.get(profile, 'target')
+        self.provider = config.get(profile,'provider')
+        self.credentials = os.path.expanduser(config.get(profile, 'credentials'))
+        
         
     def build(self):
         self.handle_embedfiles()
@@ -36,7 +59,7 @@ class ImgFacBuild(object):
         else:
             self.log.info("Final TDL produced at: %s" % self.finaltdl)
             self.log.debug("TDL only requested. No build.")
-
+          
     def handle_embedfiles(self):
         '''
         Takes a files.yaml file for each name and creates a files.tdl for later merging. 
@@ -124,11 +147,24 @@ class ImgFacBuild(object):
     
     def run_imagefactory(self):
         self.log.info("Running imagefactory base...")
-        (status, uuid) = run_imagefactory_base(tdlfile)
-        self.log.info("Ran imagefactory base...") 
-        if uuid is not None and target is not None:
-            (status,uuid) = run_imagefactory_target(uuid, target)
-        self.log.info("Ran imagefactory target...")
+        try:
+            baseuuid = self.run_imagefactory_base(self.finaltdl)
+            self.log.info("Ran imagefactory base...") 
+            if self.target:
+                targetuuid = self.run_imagefactory_target(baseuuid)
+                self.log.info("Ran imagefactory target...")
+            
+            if self.provider:
+                self.run_imagefactory_provider(targetuuid)
+                self.log.info("Ran imagefactory provider...")
+
+        except ImgfacBuildBaseException, e:
+            self.log.error("Something went wrong running imagefactory base.")
+        except ImgfacBuildTargetException, e:
+            self.log.error("Something went wrong running imagefactory target.")
+        except ImgfacBuildProviderException, e:
+            self.log.error("Something went wrong running imagefactory provider.")
+    
     
     def run_imagefactory_base(self, tdlfile):
         '''
@@ -142,62 +178,31 @@ class ImgFacBuild(object):
         '''
         cmd = "time imagefactory --debug base_image %s " % (tdlfile)
         self.log.info("Running imagefactory: '%s'" % cmd)
-        self.log.debug("cmd is %s" % cmd)
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-        sec = 0
-        retcode = None
-        INTERVAL = 30
-        while retcode is None:
-            retcode = p.poll()
-            time.sleep(INTERVAL)
-            sec = sec + INTERVAL
-            if sec < 60:        
-                self.log.debug("%s seconds elapsed..." % sec)
-            else:
-                min =  sec / 60
-                secmod = sec % 60
-                self.log.debug("%s min %s sec elapsed..." % (min, secmod))
-                if min % 3  == 0 and secmod == 0:
-                    self.log.info("Running. %s minutes elapsed..." % min)  
-        (out, err) = p.communicate()
-        self.log.debug('out = %s' % out)
-        self.log.debug('err = %s' % err)
+        (out, err) = self.run_timed_command(cmd)
         (status, uuid) = parse_imagefactory_return(out)
-        return (status,uuid)
+        if status == 0:
+            return uuid
+        else:
+            raise ImgfacBuildBaseException("Status was %d, error: %s" % (status, err))
         
     
     def run_imagefactory_target(self, uuid):
-        cmd = "time imagefactory --debug target_image --id %s %s " % (uuid, target)
+        cmd = "time imagefactory --debug target_image --id %s %s " % (uuid, self.target)
         self.log.info("Running imagefactory: '%s'" % cmd)
-        self.log.debug("cmd is %s" % cmd)
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-        sec = 0
-        retcode = None
-        INTERVAL = 30
-        while retcode is None:
-            retcode = p.poll()
-            time.sleep(INTERVAL)
-            sec = sec + INTERVAL
-            if sec < 60:        
-                self.log.debug("%s seconds elapsed..." % sec)
-            else:
-                min =  sec / 60
-                secmod = sec % 60
-                self.log.debug("%s min %s sec elapsed..." % (min, secmod))
-                if min % 3  == 0 and secmod == 0:
-                    self.log.info("Running. %s minutes elapsed..." % min)  
-        (out, err) = p.communicate()
-        self.log.debug('out = %s' % out)
-        self.log.debug('err = %s' % err)
+        (out, err) = self.run_timed_command(cmd)
         (status, uuid) = parse_imagefactory_return(out)
-        
-        if status is not None: 
-            if target == 'openstack-kvm':
-                print("glance --verbose image-create --name name --disk-format raw --container-format bare --file /home/imagefactory/lib/storage/%s.body --is-public False" % uuid)
-            elif target == 'ec2':
-                print("imagefactory provider_image --id %s ec2 @us-east-1 ec2_credentials.xml" % uuid)
+        if status == 0:
+            return uuid
         else:
-            self.log.warning("imagefactory had error: %s" % err)
+            raise ImgfacBuildTargetException("Status was %d, error: %s" % (status, err))
+
+        #if status is not None: 
+        #    if target == 'openstack-kvm':
+        #        print("glance --verbose image-create --name name --disk-format raw --container-format bare --file /home/imagefactory/lib/storage/%s.body --is-public False" % uuid)
+        #    elif target == 'ec2':
+        #        print("imagefactory provider_image --id %s ec2 @us-east-1 ec2_credentials.xml" % uuid)
+        #else:
+        #    self.log.warning("imagefactory had error: %s" % err)
 
     def run_imagefactory_provider(self, uuid):
         cmd = "time imagefactory --%s provider_image --id %s %s " % (self.loglevel, uuid, self.target, self.credential)
@@ -231,6 +236,31 @@ class ImgFacBuild(object):
                 print("imagefactory provider_image --id %s ec2 @us-east-1 ec2_credentials.xml" % uuid)
         else:
             self.log.warning("imagefactory had error: %s" % err)
+
+    def run_timed_command(self, cmd):
+        self.log.debug("cmd is %s" % cmd)
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        sec = 0
+        retcode = None
+        INTERVAL = 30
+        while retcode is None:
+            retcode = p.poll()
+            time.sleep(INTERVAL)
+            sec = sec + INTERVAL
+            if sec < 60:        
+                self.log.debug("%s seconds elapsed..." % sec)
+            else:
+                min =  sec / 60
+                secmod = sec % 60
+                self.log.debug("%s min %s sec elapsed..." % (min, secmod))
+                if min % 3  == 0 and secmod == 0:
+                    self.log.info("Running. %s minutes elapsed..." % min)  
+        (out, err) = p.communicate()
+        self.log.debug('out = %s' % out)
+        self.log.debug('err = %s' % err)
+        return (out, err)
+
+
 
 
 def parse_imagefactory_return(text):
@@ -294,11 +324,11 @@ def checkext(filename, ext):
 
 def main():
     
-    global log
-    global workdir
-    global fileroot
-    global target
-    global tdlonly 
+    #global log
+    #global workdir
+    #global fileroot
+    #global target
+    #global tdlonly 
     
     debug = 0
     info = 0
@@ -307,10 +337,12 @@ def main():
     logfile = sys.stderr
     outfile = sys.stdout
     workdir = os.path.expanduser("~/tmp")
-    target = None
-    config_file = None
-    default_configfile = os.path.expanduser("~/etc/imgfac.conf")
     profile = None
+    target = None
+    provider = None
+    credentials = None
+    default_configfile = os.path.expanduser("~/etc/imgfac.conf")
+    config_file = None
     
     usage = """Usage: imgfac-build.py [OPTIONS] TDL  [TDL2  FILE3 ] 
    merge-tdls takes multiple TDLs and merges them, with later TDLs overriding earlier ones. 
@@ -335,16 +367,15 @@ def main():
     argv = sys.argv[1:]
     try:
         opts, args = getopt.getopt(argv, 
-                                   "hdvc:t:r:L:o:t:w:Tp:", 
+                                   "hdvc:t:r:L:o:w:Tp:", 
                                    ["help", 
                                     "debug", 
                                     "verbose",
                                     "config=",
-                                    "tempdir=",
+                                    "target=",
                                     "fileroot=",
                                     "logfile=",
                                     "outfile=",
-                                    "target=",
                                     "workdir=",
                                     "tdl",
                                     "profile",
@@ -363,16 +394,20 @@ def main():
             info = 1
         elif opt in ("-c", "--config"):
             config_file = arg
-        elif opt in ("-L","--logfile"):
-            logfile = arg
+        elif opt in ("-t", "--target"):
+            target = arg
         elif opt in ("-r","--fileroot"):
             fileroot = arg
+        elif opt in ("-L","--logfile"):
+            logfile = arg
         elif opt in ("-w", "--workdir"):
             workdir = arg               
         elif opt in ("-T", "--tdl"):
             tdlonly = 1
         elif opt in ("-p", "--profile"):
             profile = arg
+
+
 
     # Read in config file
     config=ConfigParser()
@@ -442,6 +477,9 @@ def main():
             config.set(profile, 'tdlonly', "False")
         config.set(profile, 'fileroot', fileroot )
         config.set(profile, 'templates', files)
+        config.set(profile, 'target', target )
+        config.set(profile, 'provider', provider )
+        config.set(profile, 'credentials', credentials )
         s = "[%s]" % profile
         for option in config.options(profile):
             val = config.get(profile, option)
