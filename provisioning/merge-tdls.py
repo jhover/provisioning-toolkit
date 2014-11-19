@@ -41,13 +41,14 @@ class MergeTDLs(object):
             self.outfile = open(self.outfile, 'w')
         merged.write(self.outfile)
         if self.outfile != sys.stdout:
+            self.log.info("Done writing file %s" % self.outfile)
             self.outfile.close()
 
     def mergefiles(self):
         first = None
         tree = None
         for filename in self.files:
-            self.log.debug("Processing file %s" % filename)
+            self.log.info("Processing file %s" % filename)
             if first is None:
                 tree = ElementTree.parse(filename)
                 root = tree.getroot()
