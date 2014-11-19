@@ -331,10 +331,10 @@ def main():
     #global target
     #global tdlonly 
     
-    debug = 0
-    info = 0
-    warn = 0
-    tdlonly = 0
+    debug = False
+    info = False
+    warn = False
+    tdlonly = False
     logfile = sys.stderr
     outfile = sys.stdout
     workdir = os.path.expanduser("~/tmp")
@@ -390,9 +390,9 @@ def main():
             print(usage)                     
             sys.exit()            
         elif opt in ("-d", "--debug"):
-            debug = 1
+            debug = True
         elif opt in ("-v", "--verbose"):
-            info = 1
+            info = True
         elif opt in ("-c", "--config"):
             config_file = arg
         elif opt in ("-t", "--target"):
@@ -404,7 +404,7 @@ def main():
         elif opt in ("-w", "--workdir"):
             workdir = arg               
         elif opt in ("-T", "--tdl"):
-            tdlonly = 1
+            tdlonly = True
         elif opt in ("-p", "--profile"):
             profile = arg
 
@@ -467,25 +467,30 @@ def main():
         templates=
         
         '''
+        # Create ad-hoc profile for command line args...
         profile = 'adhoc'
         files = args
         log.debug("files are %s" % files)
         config.add_section(profile)
         config.set(profile, 'workdir', workdir )
+        config.set(profile, 'fileroot', fileroot )
+        config.set(profile, 'templates', files)
+        
         if tdlonly:
             config.set(profile, 'tdlonly', "True")
         else:
             config.set(profile, 'tdlonly', "False")
-        config.set(profile, 'fileroot', fileroot )
-        config.set(profile, 'templates', files)
+
         if target:
             config.set(profile, 'target', target )
         else:
             config.set(profile, 'target', 'None' )
+        
         if provider:
             config.set(profile, 'provider', provider )
         else:
             config.set(profile, 'provider', 'None' )
+        
         if credentials:
             config.set(profile, 'credentials', credentials )
         else:
@@ -495,10 +500,12 @@ def main():
         for option in config.options(profile):
             val = config.get(profile, option)
             s+= " %s=%s " % ( option, val )
-        log.debug(s) 
+        log.debug(s)
+    log.debug("Creating ImgFacBuild object...") 
     ifb = ImgFacBuild(config, profile)
+    log.debug("Running build...") 
     ifb.build()
-
+    
 
 
 if __name__ == "__main__": 
