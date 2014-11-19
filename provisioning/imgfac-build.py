@@ -63,7 +63,7 @@ class ImgFacBuild(object):
             else:
                 self.log.debug("No <name>.files.yaml file so doing nothing.")
     
-    def make_withfiles(self, files):
+    def make_withfiles(self):
         '''
         Combine all <name>.files.tdl and <name>.tdl files into <name>.withfiles.tdl
             '''
@@ -73,8 +73,8 @@ class ImgFacBuild(object):
             p = getpathdir(f)
             self.log.info("Handling %s" % f)                  
             self.log.debug("Handling path=%s name=%s ext=%s" % (p, name, ext))
-            wfp = "%s/%s.files.tdl" % (tempdir,name)
-            destname = "%s/%s.withfiles.tdl" % (tempdir,name)
+            wfp = "%s/%s.files.tdl" % (self.workdir,name)
+            destname = "%s/%s.withfiles.tdl" % (self.workdir,name)
             if os.path.exists(wfp):
                 self.log.debug("yep. running merge-tdls...")
                 cmd = "merge-tdls -o %s %s %s " % ( destname, f, wfp )
