@@ -477,9 +477,19 @@ def main():
             config.set(profile, 'tdlonly', "False")
         config.set(profile, 'fileroot', fileroot )
         config.set(profile, 'templates', files)
-        config.set(profile, 'target', target )
-        config.set(profile, 'provider', provider )
-        config.set(profile, 'credentials', credentials )
+        if target:
+            config.set(profile, 'target', target )
+        else:
+            config.set(profile, 'target', 'None' )
+        if provider:
+            config.set(profile, 'provider', provider )
+        else:
+            config.set(profile, 'provider', 'None' )
+        if credentials:
+            config.set(profile, 'credentials', credentials )
+        else:
+            config.set(profile, 'credentials', 'None' )        
+        
         s = "[%s]" % profile
         for option in config.options(profile):
             val = config.get(profile, option)
