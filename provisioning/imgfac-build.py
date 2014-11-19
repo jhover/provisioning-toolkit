@@ -14,7 +14,9 @@ import shutil
 import StringIO
 import sys
 import subprocess
+import tempfile
 import time
+
 from ConfigParser import ConfigParser
 
 class ImgfacBuildBaseException(Exception):
@@ -209,39 +211,21 @@ class ImgFacBuild(object):
     def run_imagefactory_provider(self, uuid):
         cmd = "time imagefactory --%s provider_image --id %s %s " % (self.loglevel, uuid, self.target, self.credential)
         self.log.info("Running imagefactory: '%s'" % cmd)
-        self.log.debug("cmd is %s" % cmd)
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-        sec = 0
-        retcode = None
-        INTERVAL = 30
-        while retcode is None:
-            retcode = p.poll()
-            time.sleep(INTERVAL)
-            sec = sec + INTERVAL
-            if sec < 60:        
-                self.log.debug("%s seconds elapsed..." % sec)
-            else:
-                min =  sec / 60
-                secmod = sec % 60
-                self.log.debug("%s min %s sec elapsed..." % (min, secmod))
-                if min % 3  == 0 and secmod == 0:
-                    self.log.info("Running. %s minutes elapsed..." % min)  
-        (out, err) = p.communicate()
-        self.log.debug('out = %s' % out)
-        self.log.debug('err = %s' % err)
+        (out, err) = self.run_timed_command(cmd)
         (status, uuid) = parse_imagefactory_return(out)
         
-        if status is not None: 
-            if target == 'openstack-kvm':
-                print("glance --verbose image-create --name name --disk-format raw --container-format bare --file /home/imagefactory/lib/storage/%s.body --is-public False" % uuid)
-            elif target == 'ec2':
-                print("imagefactory provider_image --id %s ec2 @us-east-1 ec2_credentials.xml" % uuid)
+        if status == 0:
+            self.log.info("Provider image done.")
         else:
-            self.log.warning("imagefactory had error: %s" % err)
+            raise ImgfacBuildProviderException("Status was %d, error: %s" % (status, err))
+       
 
     def run_timed_command(self, cmd):
+        tmpout = tempfile.mkstemp(prefix='imgfac-build-')
+        cmd += " 2>&1 | tee %s" % tmpout 
+        self.log.info("Output from subcommand is in %s" % tmpout)
         self.log.debug("cmd is %s" % cmd)
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
         sec = 0
         retcode = None
         INTERVAL = 30
@@ -261,9 +245,6 @@ class ImgFacBuild(object):
         self.log.debug('out = %s' % out)
         self.log.debug('err = %s' % err)
         return (out, err)
-
-
-
 
 def parse_imagefactory_return(text):
     uuid = None
