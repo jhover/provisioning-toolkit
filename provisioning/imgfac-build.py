@@ -30,7 +30,7 @@ class ImgFacBuild(object):
     def build(self):
         self.handle_embedfiles()
         self.make_withfiles()
-        self.finaltdl = handle_mergetdls()
+        self.finaltdl = self.handle_mergetdls()
         if not self.tdlonly:
             self.run_imagefactory()
         else:
@@ -89,7 +89,7 @@ class ImgFacBuild(object):
                 self.log.debug("copied %s -> %s" % (f,destname))
     
     
-    def handle_mergetdls(self, files):
+    def handle_mergetdls(self):
         '''
         Combine all <name>.withfiles.tdl into final tdl named
           <name1>-<name2>-<nameN>.tdl
@@ -102,7 +102,7 @@ class ImgFacBuild(object):
             ext = getext(f)
             p = getpathdir(f) 
             self.log.info("Handling %s" % f)
-            wfp = "%s/%s.withfiles.tdl" % (tempdir,name)
+            wfp = "%s/%s.withfiles.tdl" % (self.workdir,name)
             withfiles.append(wfp)
             if destname == "":
                 destname = "%s" % name
@@ -111,13 +111,13 @@ class ImgFacBuild(object):
         
         self.log.debug("withfiles is %s" % withfiles)
         allfiles = " ".join(withfiles)
-        cmd = "merge-tdls -o %s/%s.tdl %s" % (tempdir, destname, allfiles )
+        cmd = "merge-tdls -o %s/%s.tdl %s" % (self.workdir, destname, allfiles )
         self.log.debug("command= %s" % cmd)
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         (out, err) = p.communicate()
         self.log.debug('err = %s' % err)
         self.log.debug('out = %s' % out)
-        retval = "%s/%s.tdl" % (tempdir, destname)
+        retval = "%s/%s.tdl" % (self.workdir, destname)
         self.log.debug('returning %s'% retval)
         return retval
     
