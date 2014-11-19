@@ -34,7 +34,7 @@ class ImgFacBuild(object):
         if not self.tdlonly:
             self.run_imagefactory()
         else:
-            self.log.info("Final TDL produced at: %s" % finaltdl)
+            self.log.info("Final TDL produced at: %s" % self.finaltdl)
             self.log.debug("TDL only requested. No build.")
 
     def handle_embedfiles(self):
