@@ -24,7 +24,7 @@ class ImgFacBuild(object):
         self.config = config
         self.profile = profile
         self.tdlonly = config.get(profile,'tdlonly')
-        
+        self.files = config.get(profile, 'templates')
         
     def build(self):
         self.handle_embedfiles()
@@ -440,6 +440,7 @@ def main():
         else:
             config.set(profile, 'tdlonly', "False")
         config.set(profile, 'fileroot', fileroot )
+        config.set(profile, 'templates', files)
         s = "[%s]" % profile
         for option in config.options(profile):
             val = config.get(profile, option)
