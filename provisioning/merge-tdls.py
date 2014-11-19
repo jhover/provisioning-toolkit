@@ -271,6 +271,7 @@ class MergeTDLsCLI(object):
 def ensurefile(filepath, clear = False):
     filepath = os.path.expandvars(filepath)
     filepath = os.path.expanduser(filepath)
+    filepath = os.path.abspath(filepath)
     d = os.path.dirname(filepath)
     if not os.path.exists(d):
         os.makedirs(d)
