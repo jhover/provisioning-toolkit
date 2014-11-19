@@ -159,6 +159,7 @@ class MergeTDLs(object):
             #self.log.debug("%s %s %s" % (indent, elem.tag, elem.attrib))
         for child in elem:
             s += self.printelements(child, depth + 1)
+        return s
 
 
 class MergeTDLsCLI(object):
