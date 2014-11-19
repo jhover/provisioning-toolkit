@@ -55,11 +55,12 @@ class ImgFacBuild(object):
         self.handle_embedfiles()
         self.make_withfiles()
         self.finaltdl = self.handle_mergetdls()
-        if not self.tdlonly:
-            self.run_imagefactory()
-        else:
+        self.log.debug("tdlonly value is %s" % self.tdlonly )
+        if self.tdlonly:
             self.log.info("Final TDL produced at: %s" % self.finaltdl)
             self.log.debug("TDL only requested. No build.")
+        else:
+            self.run_imagefactory()            
           
     def handle_embedfiles(self):
         '''
