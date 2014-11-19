@@ -42,7 +42,7 @@ class ImgFacBuild(object):
         self.log = logging.getLogger()
         self.config = config
         self.profile = profile
-        self.tdlonly = config.get(profile,'tdlonly')
+        self.tdlonly = config.getboolean(profile,'tdlonly')
         self.files = config.get(profile, 'templates')
         self.workdir = os.path.expanduser(config.get(profile,'workdir'))
         self.fileroot = os.path.expanduser(config.get(profile,'fileroot'))
