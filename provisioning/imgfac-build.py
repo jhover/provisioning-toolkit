@@ -74,10 +74,10 @@ class ImgFacBuild(object):
             self.log.debug("yamlfile=%s" % yamlfile )
             yfp = "%s/%s" % (p, yamlfile)
             self.log.debug("checking if %s exists..." % yfp  ) 
-            destname = "%s/%s.files.tdl" % (self.workdir,name)
+            destname = "%s/%s.files.tdl" % (self.workdir, name)
             if os.path.exists(yfp):
                 self.log.debug("yep. running embed_files...")
-                cmd = "embed-files -o %s --fileroot %s %s " % ( destname, fileroot, yfp)
+                cmd = "embed-files -o %s --fileroot %s %s " % ( destname, self.fileroot, yfp)
                 self.log.debug("command: %s" % cmd)
                 p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
                 (out, err) = p.communicate()
