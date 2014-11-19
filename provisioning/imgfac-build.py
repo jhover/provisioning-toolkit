@@ -26,23 +26,21 @@ class ImgFacBuild(object):
         self.tdlonly = config.get(profile,'tdlonly')
         
         
-    def build(self, files):
-        if files:
-            handle_embedfiles(files)
-            make_withfiles(files)
-            finaltdl = handle_mergetdls(files)
-        if not tdlonly:
-            run_imagefactory(finaltdl)
+    def build(self):
+        self.handle_embedfiles()
+        self.make_withfiles()
+        self.finaltdl = handle_mergetdls()
+        if not self.tdlonly:
+            self.run_imagefactory()
         else:
             self.log.info("Final TDL produced at: %s" % finaltdl)
             self.log.debug("TDL only requested. No build.")
 
-
-    def handle_embedfiles(self, files):
+    def handle_embedfiles(self):
         '''
         Takes a files.yaml file for each name and creates a files.tdl for later merging. 
         '''
-        for f in files:
+        for f in self.files:
             name = getname(f)
             ext = getext(f)
             p = getpathdir(f)
@@ -68,7 +66,7 @@ class ImgFacBuild(object):
         '''
         Combine all <name>.files.tdl and <name>.tdl files into <name>.withfiles.tdl
             '''
-        for f in files:
+        for f in self.files:
             name = getname(f)
             ext = getext(f)
             p = getpathdir(f)
@@ -98,7 +96,7 @@ class ImgFacBuild(object):
         '''
         withfiles = []
         destname = ""
-        for f in files:
+        for f in self.files:
             name = getname(f)
             ext = getext(f)
             p = getpathdir(f) 
@@ -123,7 +121,7 @@ class ImgFacBuild(object):
         return retval
     
     
-    def run_imagefactory(self, tdlfile):
+    def run_imagefactory(self):
         self.log.info("Running imagefactory base...")
         (status, uuid) = run_imagefactory_base(tdlfile)
         self.log.info("Ran imagefactory base...") 
@@ -289,7 +287,7 @@ def getpathdir(filename):
 def checkext(filename, ext):
     e = getext(filename)
     if e.lower() != ext.lower():
-        raise Exception("All input files must hav .%s extension." % ext)
+        raise Exception("All input files must have .%s extension." % ext)
 
 
 
@@ -448,6 +446,7 @@ def main():
             s+= " %s=%s " % ( option, val )
         log.debug(s) 
     ifb = ImgFacBuild(config, profile)
+    ifb.build()
 
 
 
