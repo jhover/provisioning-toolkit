@@ -38,7 +38,7 @@ class MergeTDLs(object):
             s = self.printelements(merged.getroot())
             self.log.debug(s)
         if self.outfile != sys.stdout:
-            self.outfile = open(outfile, 'w')
+            self.outfile = open(self.outfile, 'w')
         merged.write(self.outfile)
         if self.outfile != sys.stdout:
             self.outfile.close()
