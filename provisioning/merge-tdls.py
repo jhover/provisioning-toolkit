@@ -102,7 +102,7 @@ class MergeTDLs(object):
         # add completely missing children   
         for secondchild in second:
             if secondchild.tag not in firsttags:
-                log.debug("Adding missing child %s to first"% secondchild)
+                self.log.debug("Adding missing child %s to first"% secondchild)
                 first.append(secondchild)
     
     def eq_elements(self, first, second):     
