@@ -254,7 +254,7 @@ class MergeTDLsCLI(object):
         self.log.debug("Outfile: %s" % self.outfile)
         self.log.debug("Logfile: %s" % self.logfile)
         self.files = args
-        self.log.debug("Files: %s " % files)
+        self.log.debug("Files: %s " % self.files)
         self.log.info("CLI init complete.")
 
     def execute(self): 
