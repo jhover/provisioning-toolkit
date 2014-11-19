@@ -32,11 +32,11 @@ class MergeTDLs(object):
             self.printelements(root)
         self.log.debug("Merging files *******************" % self.files)
         merged = self.mergefiles()
-        self.log.debug("Printing merged structure *******************")
-        #self.log.debug(merged)        
+        self.log.debug("Printing merged structure *******************")    
         if self.log.isEnabledFor(logging.DEBUG):
             s = self.printelements(merged.getroot())
             self.log.debug(s)
+            self.log.debug("\nEnd of merged structure *******************")
         if self.outfile != sys.stdout:
             self.outfile = open(self.outfile, 'w')
         merged.write(self.outfile)
