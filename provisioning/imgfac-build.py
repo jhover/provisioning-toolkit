@@ -25,6 +25,7 @@ class ImgFacBuild(object):
         self.profile = profile
         self.tdlonly = config.get(profile,'tdlonly')
         self.files = config.get(profile, 'templates')
+        self.workdir = os.path.expanduser(config.get(profile,'workdir'))
         
     def build(self):
         self.handle_embedfiles()
@@ -50,7 +51,7 @@ class ImgFacBuild(object):
             self.log.debug("yamlfile=%s" % yamlfile )
             yfp = "%s/%s" % (p, yamlfile)
             self.log.debug("checking if %s exists..." % yfp  ) 
-            destname = "%s/%s.files.tdl" % (tempdir,name)
+            destname = "%s/%s.files.tdl" % (self.workdir,name)
             if os.path.exists(yfp):
                 self.log.debug("yep. running embed_files...")
                 cmd = "embed-files -o %s --fileroot %s %s " % ( destname, fileroot, yfp)
