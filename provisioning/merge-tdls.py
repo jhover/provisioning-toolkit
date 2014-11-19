@@ -24,7 +24,8 @@ class MergeTDLs(object):
 
     def handlefiles(self):
         if self.outfile != sys.stdout:
-                ensurefile(self.outfile, clear=True)
+            self.log.debug("Output is not stdout.")
+            ensurefile(self.outfile, clear=True)
         for filename in self.files:
             self.log.debug("Processing file %s *******************" % filename)
             root = ElementTree.parse(filename).getroot() 
@@ -175,7 +176,6 @@ class MergeTDLsCLI(object):
         self.warn = 0
         self.logfile = sys.stderr
         self.outfile = sys.stdout
-        
         self.usage = """Usage: merge-tdls.py [OPTIONS] FILE1  FILE2 [ FILE3 ] 
        merge-tdls takes multiple TDLs and merges them, with later TDLs overriding earlier ones. 
        OPTIONS: 
@@ -187,8 +187,6 @@ class MergeTDLsCLI(object):
             -o --outfile                STDOUT
             
          """
-
-    def execute(self):
         # Handle command line options
         argv = sys.argv[1:]
         try:
@@ -238,6 +236,7 @@ class MergeTDLsCLI(object):
         formatter = logging.Formatter(formatstr)
         hdlr.setFormatter(formatter)
         self.log.addHandler(hdlr)
+
         # Handle file-based logging.
         if self.logfile != sys.stderr:
             ensurefile(self.logfile)        
@@ -252,13 +251,20 @@ class MergeTDLsCLI(object):
         if self.info:
             self.log.setLevel(logging.INFO) # Override with command line switches
         
-        self.log.debug("%s" %sys.argv)
+        self.log.debug("Outfile: %s" % self.outfile)
+        self.log.debug("Logfile: %s" % self.logfile)
         files = args
-        self.log.debug(files)
-    
+        self.log.debug("Files: %s " % files)
+        self.log.info("CLI init complete.")
+
+    def execute(self): 
         if files:
             self.mt = MergeTDLs(files)
             self.mt.handlefiles()
+        else:
+            print( self.usage )                          
+            sys.exit(1)
+            
 #
 #    Functions
 #
