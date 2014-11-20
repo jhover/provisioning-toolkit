@@ -210,13 +210,14 @@ class ImgFacBuild(object):
        
 
     def run_timed_command(self, cmd):
-        (tfd, tmpout ) = tempfile.mkstemp(prefix='imgfac-build-')
+        (tfd, tpath ) = tempfile.mkstemp(prefix='imgfac-build-')
+        tempfile = os.fdopen_(tfd)
         #teeout = " > %s " % tmpout
         #cmd += " %s " % teeout
-        self.log.info("Output from subcommand is in %s" % tmpout)
+        self.log.info("Output from subcommand is in %s" % tpath)
         self.log.debug("cmd is %s" % cmd)
         #p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-        p = subprocess.Popen(cmd, stdout=tfd, stderr=subprocess.PIPE, shell=True)
+        p = subprocess.Popen(cmd, stdout=tempfile, stderr=subprocess.PIPE, shell=True)
         sec = 0
         retcode = None
         INTERVAL = 30
@@ -233,9 +234,12 @@ class ImgFacBuild(object):
                 if min % 3  == 0 and secmod == 0:
                     self.log.info("Running. %s minutes elapsed..." % min)  
         (out, err) = p.communicate()
+        
         f = open(tmpout)
         out = f.read()
         f.close()
+        
+        tempfile.close()
         self.log.debug('out = %s' % out)
         self.log.debug('err = %s' % err)
         return (out, err)
