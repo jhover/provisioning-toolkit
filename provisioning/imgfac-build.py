@@ -184,8 +184,8 @@ class ImgFacBuild(object):
         self.log.info("Running imagefactory: '%s'" % cmd)
         (out, err) = self.run_timed_command(cmd)
         (status, uuid) = self.parse_imagefactory_return(out)
-        if status != 0:
-            raise ImgfacBuildBaseException("Status was %d, error: %s" % (status, err))
+        if status is not True:
+            raise ImgfacBuildBaseException("Status was %s, error: %s" % (status, err))
         return uuid        
     
     def run_imagefactory_target(self, uuid):
@@ -193,8 +193,8 @@ class ImgFacBuild(object):
         self.log.info("Running imagefactory: '%s'" % cmd)
         (out, err) = self.run_timed_command(cmd)
         (status, uuid) = self.parse_imagefactory_return(out)
-        if status != 0:
-            raise ImgfacBuildTargetException("Status was %d, error: %s" % (status, err))
+        if status is not True:
+            raise ImgfacBuildTargetException("Status was %s, error: %s" % (status, err))
         return uuid
 
     def run_imagefactory_provider(self, uuid):
@@ -203,11 +203,11 @@ class ImgFacBuild(object):
         (out, err) = self.run_timed_command(cmd)
         (status, uuid) = self.parse_imagefactory_return(out)
         
-        if status == 0:
-            self.log.info("Provider image done.")
-        else:
+        if status is not True:
             raise ImgfacBuildProviderException("Status was %d, error: %s" % (status, err))
-       
+        else:
+            self.log.info("Provider image done.")
+                   
 
     def run_timed_command(self, cmd):
         my_stdout = tempfile.NamedTemporaryFile(prefix='imgfac-build-out-', delete=False)        
