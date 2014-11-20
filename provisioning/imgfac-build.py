@@ -184,22 +184,18 @@ class ImgFacBuild(object):
         self.log.info("Running imagefactory: '%s'" % cmd)
         (out, err) = self.run_timed_command(cmd)
         (status, uuid) = self.parse_imagefactory_return(out)
-        if status == 0:
-            return uuid
-        else:
+        if status != 0:
             raise ImgfacBuildBaseException("Status was %d, error: %s" % (status, err))
-        
+        return uuid        
     
     def run_imagefactory_target(self, uuid):
         cmd = "time imagefactory --debug target_image --id %s %s " % (uuid, self.target)
         self.log.info("Running imagefactory: '%s'" % cmd)
         (out, err) = self.run_timed_command(cmd)
         (status, uuid) = self.parse_imagefactory_return(out)
-        if status == 0:
-            return uuid
-        else:
+        if status != 0:
             raise ImgfacBuildTargetException("Status was %d, error: %s" % (status, err))
-
+        return uuid
 
     def run_imagefactory_provider(self, uuid):
         cmd = "time imagefactory --%s provider_image --id %s %s " % (self.loglevel, uuid, self.target, self.credential)
