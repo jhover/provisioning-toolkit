@@ -237,7 +237,7 @@ class ImgFacBuild(object):
         self.log.debug('err = %s' % err)
         return (out, err)
 
-    def parse_imagefactory_return(text):
+    def parse_imagefactory_return(self, text):
         uuid = None
         status = None
         buf = StringIO.StringIO(text)
