@@ -218,6 +218,7 @@ class ImgFacBuild(object):
         self.log.debug("cmd is %s" % cmd)
         #p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         p = subprocess.Popen(cmd, stdout=tempfile, stderr=subprocess.PIPE, shell=True)
+        self.log.debug("Command running...")
         sec = 0
         retcode = None
         INTERVAL = 30
@@ -234,7 +235,7 @@ class ImgFacBuild(object):
                 if min % 3  == 0 and secmod == 0:
                     self.log.info("Running. %s minutes elapsed..." % min)  
         (out, err) = p.communicate()
-        
+        self.log.info("Command is finished. Processing output...")
         f = open(tmpout)
         out = f.read()
         f.close()
