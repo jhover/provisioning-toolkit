@@ -183,7 +183,7 @@ class ImgFacBuild(object):
         cmd = "time imagefactory --debug base_image %s " % (tdlfile)
         self.log.info("Running imagefactory: '%s'" % cmd)
         (out, err) = self.run_timed_command(cmd)
-        (status, uuid) = parse_imagefactory_return(out)
+        (status, uuid) = self.parse_imagefactory_return(out)
         if status == 0:
             return uuid
         else:
@@ -194,25 +194,18 @@ class ImgFacBuild(object):
         cmd = "time imagefactory --debug target_image --id %s %s " % (uuid, self.target)
         self.log.info("Running imagefactory: '%s'" % cmd)
         (out, err) = self.run_timed_command(cmd)
-        (status, uuid) = parse_imagefactory_return(out)
+        (status, uuid) = self.parse_imagefactory_return(out)
         if status == 0:
             return uuid
         else:
             raise ImgfacBuildTargetException("Status was %d, error: %s" % (status, err))
 
-        #if status is not None: 
-        #    if target == 'openstack-kvm':
-        #        print("glance --verbose image-create --name name --disk-format raw --container-format bare --file /home/imagefactory/lib/storage/%s.body --is-public False" % uuid)
-        #    elif target == 'ec2':
-        #        print("imagefactory provider_image --id %s ec2 @us-east-1 ec2_credentials.xml" % uuid)
-        #else:
-        #    self.log.warning("imagefactory had error: %s" % err)
 
     def run_imagefactory_provider(self, uuid):
         cmd = "time imagefactory --%s provider_image --id %s %s " % (self.loglevel, uuid, self.target, self.credential)
         self.log.info("Running imagefactory: '%s'" % cmd)
         (out, err) = self.run_timed_command(cmd)
-        (status, uuid) = parse_imagefactory_return(out)
+        (status, uuid) = self.parse_imagefactory_return(out)
         
         if status == 0:
             self.log.info("Provider image done.")
@@ -248,37 +241,37 @@ class ImgFacBuild(object):
         self.log.debug('err = %s' % err)
         return (out, err)
 
-def parse_imagefactory_return(text):
-    uuid = None
-    status = None
-    buf = StringIO.StringIO(text)
-    for line in buf.readlines():
-        #self.log.debug("line is %s" % line)
-        h1 = line[:4]
-        #print("h1 is '%s'" % h1)
-        if h1 == 'UUID':
-            #print("h1 does equal 'UUID'")
-            uuid = line[6:].strip()
-
-        h2 = line[:7]
-        #print("h2 is '%s'" % h2)
-        if h2 == 'Status:':
-            #print("h2 does equal 'Status:'")
-            s = line[8:]
-            s = s.strip()
-            #print("s is '%s'" % s)
-            if s == 'COMPLETE':
-                #print("s does equal 'COMPLETE'")
-                status = True
-            else:
-                pass
-                #print("%s != %s" % (s,'COMPLETE'))
-    if uuid is not None and status is not None:
-        self.log.info("Parsed UUID: %s" % uuid)
-        return (status, uuid)
-    else:
-        self.log.error("failed to parse UUID from text: %s" % text)
-        return (None, None)
+    def parse_imagefactory_return(text):
+        uuid = None
+        status = None
+        buf = StringIO.StringIO(text)
+        for line in buf.readlines():
+            #self.log.debug("line is %s" % line)
+            h1 = line[:4]
+            #print("h1 is '%s'" % h1)
+            if h1 == 'UUID':
+                #print("h1 does equal 'UUID'")
+                uuid = line[6:].strip()
+    
+            h2 = line[:7]
+            #print("h2 is '%s'" % h2)
+            if h2 == 'Status:':
+                #print("h2 does equal 'Status:'")
+                s = line[8:]
+                s = s.strip()
+                #print("s is '%s'" % s)
+                if s == 'COMPLETE':
+                    #print("s does equal 'COMPLETE'")
+                    status = True
+                else:
+                    pass
+                    #print("%s != %s" % (s,'COMPLETE'))
+        if uuid is not None and status is not None:
+            self.log.info("Parsed UUID: %s" % uuid)
+            return (status, uuid)
+        else:
+            self.log.error("failed to parse UUID from text: %s" % text)
+            return (None, None)
    
 
 def nameext(filename):
