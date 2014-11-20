@@ -210,14 +210,11 @@ class ImgFacBuild(object):
        
 
     def run_timed_command(self, cmd):
-        (tfd, tpath ) = tempfile.mkstemp(prefix='imgfac-build-')
-        tfile = os.fdopen(tfd, 'w+')
-        #teeout = " > %s " % tmpout
-        #cmd += " %s " % teeout
-        self.log.info("Output from subcommand is in %s" % tpath)
+        my_stdout = tempfile.NamedTemporaryFile(prefix='imgfac-build-out-', delete=False)        
+        my_stderr = tempfile.NamedTemporaryFile(prefix='imgfac-build-err-', delete=False)
+        self.log.info("Subcommand output in %s error in %s" % ( my_stdout.name, my_stderr.name))
         self.log.debug("cmd is %s" % cmd)
-        #p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-        p = subprocess.Popen(cmd, stdout=tfile, stderr=subprocess.PIPE, shell=True)
+        p = subprocess.Popen(cmd, stdout=my_stdout, stderr=my_stderr, shell=True)
         self.log.debug("Command running...")
         sec = 0
         retcode = None
@@ -234,15 +231,17 @@ class ImgFacBuild(object):
                 self.log.debug("%s min %s sec elapsed..." % (min, secmod))
                 if min % 3  == 0 and secmod == 0:
                     self.log.info("Running. %s minutes elapsed..." % min)  
-        (out, err) = p.communicate()
         self.log.info("Command is finished. Processing output...")
-        f = open(tmpout)
-        out = f.read()
-        f.close()
-        
-        tfile.close()
+        self.log.debug('Rewinding out, err files...')
+        my_stdout.seek(0)
+        my_stderr.seek(0)
+        self.log.debug('Reading out, err into strings...')
+        out = my_stdout.read()
+        err = my_stdout.read()
         self.log.debug('out = %s' % out)
         self.log.debug('err = %s' % err)
+        my_stdout.close()
+        my_stderr.close()
         return (out, err)
 
     def parse_imagefactory_return(self, text):
