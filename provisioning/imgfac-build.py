@@ -211,7 +211,7 @@ class ImgFacBuild(object):
 
     def run_timed_command(self, cmd):
         (tfd, tpath ) = tempfile.mkstemp(prefix='imgfac-build-')
-        tfile = os.fdopen_(tfd)
+        tfile = os.fdopen(tfd, 'w+')
         #teeout = " > %s " % tmpout
         #cmd += " %s " % teeout
         self.log.info("Output from subcommand is in %s" % tpath)
