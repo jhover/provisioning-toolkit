@@ -246,6 +246,24 @@ class ImgFacBuild(object):
 
     def parse_imagefactory_return(self, text):
         uuid = None
+        buf = StringIO.StringIO(text)
+        for line in buf.readlines():
+            #self.log.debug("line is %s" % line)
+            h1 = line[:4]
+            #print("h1 is '%s'" % h1)
+            if h1 == 'UUID':
+                #print("h1 does equal 'UUID'")
+                uuid = line[6:].strip()
+        if uuid is not None:
+            self.log.info("Parsed UUID: %s" % uuid)
+            return (True, uuid)
+        else:
+            self.log.error("failed to parse UUID from text: %s" % text)
+            return (None, None)
+
+
+    def parse_imagefactory_return_old(self, text):
+        uuid = None
         status = None
         buf = StringIO.StringIO(text)
         for line in buf.readlines():
