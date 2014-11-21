@@ -180,18 +180,18 @@ class ImgFacBuild(object):
             
             if self.target:
                 targetuuid = self.run_imagefactory_target(baseuuid)
-                self.log.info("Ran imagefactory target...")
+                self.log.info("Ran imagefactory target: %s" % self.target)
             
             if self.provider:
                 self.run_imagefactory_provider(targetuuid)
-                self.log.info("Ran imagefactory provider...")
+                self.log.info("Ran imagefactory provider: %s" % self.provider)
 
         except ImgfacBuildBaseException, e:
-            self.log.error("Something went wrong running imagefactory base.")
+            self.log.error("Something went wrong running imagefactory base: %s" % e)
         except ImgfacBuildTargetException, e:
-            self.log.error("Something went wrong running imagefactory target.")
+            self.log.error("Something went wrong running imagefactory target: %s" % e)
         except ImgfacBuildProviderException, e:
-            self.log.error("Something went wrong running imagefactory provider.")
+            self.log.error("Something went wrong running imagefactory provider: %s" % e)
     
     
     def run_imagefactory_base(self, tdlfile):
@@ -233,6 +233,8 @@ Image build completed SUCCESSFULLY!
 
     def run_imagefactory_provider(self, uuid):
         '''
+        imagefactory --debug  provider_image --id <id> ec2 @us-east-1 etc/ec2_credentials.xml
+        
         ============ Final Image Details ============
 UUID: 222505c7-f523-4af9-8770-83ba8dc62b67
 Type: provider_image
@@ -242,7 +244,10 @@ Image build completed SUCCESSFULLY!
         
         '''
               
-        cmd = "time imagefactory --%s provider_image --id %s %s " % (self.loglevel, uuid, self.target, self.credential)
+        cmd = "time imagefactory --%s provider_image --id %s %s " % (self.loglevel, 
+                                                                     uuid, 
+                                                                     self.target, 
+                                                                     self.credential)
         self.log.info("Running imagefactory: '%s'" % cmd)
         (out, err) = self.run_timed_command(cmd)
         (status, uuid) = self.parse_imagefactory_return(out)
@@ -254,6 +259,10 @@ Image build completed SUCCESSFULLY!
                    
 
     def run_timed_command(self, cmd):
+        #
+        # This is necessary because using subprocess.PIPE and p.communicate() hangs when
+        # output is very large. 
+        #
         my_stdout = tempfile.NamedTemporaryFile(prefix='imgfac-build-out-', delete=False)        
         my_stderr = tempfile.NamedTemporaryFile(prefix='imgfac-build-err-', delete=False)
         self.log.info("Subcommand output in %s error in %s" % ( my_stdout.name, my_stderr.name))
@@ -287,6 +296,7 @@ Image build completed SUCCESSFULLY!
         my_stdout.close()
         my_stderr.close()
         return (out, err)
+
 
     def parse_imagefactory_return(self, text):
         uuid = None
