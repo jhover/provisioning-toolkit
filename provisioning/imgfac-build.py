@@ -17,7 +17,7 @@ import subprocess
 import tempfile
 import time
 
-from ConfigParser import ConfigParser
+from ConfigParser import SafeConfigParser
 
 class ImgfacBuildBaseException(Exception):
     def __init__(self, value):
