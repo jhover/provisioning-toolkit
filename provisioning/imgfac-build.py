@@ -49,9 +49,11 @@ class ImgFacBuild(object):
         self.templates = self.templates.split(',')
         self.workdir = os.path.expanduser(config.get(profile,'workdir'))
         self.fileroot = os.path.expanduser(config.get(profile,'fileroot'))
-        self.target = config.get(profile, 'target')
+        self.target = config.get(profile,'target')
         self.provider = config.get(profile,'provider')    
         self.credentials = os.path.expanduser(config.get(profile, 'credentials'))
+
+        self.log.debug("%s" % self)
         
         # Fix None values.  
         if self.target == 'None':
