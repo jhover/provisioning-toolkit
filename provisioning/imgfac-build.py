@@ -43,7 +43,7 @@ class ImgFacBuild(object):
     def __init__(self, config, profile):
         self.log = logging.getLogger()
         self.config = config
-        self.profile = profile
+        self.profile = profile       
         self.tdlonly = config.getboolean(profile,'tdlonly')
         self.templates = config.get(profile, 'templates')
         self.templates = self.templates.split(',')
@@ -244,10 +244,9 @@ Image build completed SUCCESSFULLY!
         
         '''
               
-        cmd = "time imagefactory --%s provider_image --id %s %s " % (self.loglevel, 
-                                                                     uuid, 
-                                                                     self.target, 
-                                                                     self.credential)
+        cmd = "time imagefactory --debug provider_image --id %s %s " % (uuid, 
+                                                                        self.target, 
+                                                                        self.credential)
         self.log.info("Running imagefactory: '%s'" % cmd)
         (out, err) = self.run_timed_command(cmd)
         (status, uuid) = self.parse_imagefactory_return(out)
