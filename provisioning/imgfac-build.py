@@ -246,7 +246,7 @@ Image build completed SUCCESSFULLY!
               
         cmd = "time imagefactory --debug provider_image --id %s %s " % (uuid, 
                                                                         self.target, 
-                                                                        self.credential)
+                                                                        self.credentials)
         self.log.info("Running imagefactory: '%s'" % cmd)
         (out, err) = self.run_timed_command(cmd)
         (status, uuid) = self.parse_imagefactory_return(out)
