@@ -498,7 +498,7 @@ def main():
         # Create ad-hoc profile for command line args...
         profile = 'adhoc'
         templates = args
-        log.debug("files are %s" % files)
+        log.debug("files are %s" % templates)
         config.add_section(profile)
         config.set(profile, 'workdir', workdir )
         config.set(profile, 'fileroot', fileroot )
