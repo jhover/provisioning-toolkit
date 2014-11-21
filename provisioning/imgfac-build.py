@@ -45,7 +45,8 @@ class ImgFacBuild(object):
         self.config = config
         self.profile = profile
         self.tdlonly = config.getboolean(profile,'tdlonly')
-        self.files = config.get(profile, 'templates')
+        self.templates = config.get(profile, 'templates')
+        self.templates = self.templates.split(',')
         self.workdir = os.path.expanduser(config.get(profile,'workdir'))
         self.fileroot = os.path.expanduser(config.get(profile,'fileroot'))
         self.target = config.get(profile, 'target')
@@ -496,12 +497,12 @@ def main():
         '''
         # Create ad-hoc profile for command line args...
         profile = 'adhoc'
-        files = args
+        templates = args
         log.debug("files are %s" % files)
         config.add_section(profile)
         config.set(profile, 'workdir', workdir )
         config.set(profile, 'fileroot', fileroot )
-        config.set(profile, 'templates', files)
+        config.set(profile, 'templates', ', '.join(templates))
         #config.set(profile, 'target', target )
         #config.set(profile, 'provider', provider )
         #config.set(profile, 'credentials', credentials )        
