@@ -77,7 +77,7 @@ class ImgFacBuild(object):
         '''
         Takes a files.yaml file for each name and creates a files.tdl for later merging. 
         '''
-        for f in self.files:
+        for f in self.templates:
             name = getname(f)
             ext = getext(f)
             p = getpathdir(f)
@@ -103,7 +103,7 @@ class ImgFacBuild(object):
         '''
         Combine all <name>.files.tdl and <name>.tdl files into <name>.withfiles.tdl
             '''
-        for f in self.files:
+        for f in self.templates:
             name = getname(f)
             ext = getext(f)
             p = getpathdir(f)
@@ -133,7 +133,7 @@ class ImgFacBuild(object):
         '''
         withfiles = []
         destname = ""
-        for f in self.files:
+        for f in self.templates:
             name = getname(f)
             ext = getext(f)
             p = getpathdir(f) 
