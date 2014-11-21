@@ -189,6 +189,16 @@ class ImgFacBuild(object):
         return uuid        
     
     def run_imagefactory_target(self, uuid):
+        '''
+        ============ Final Image Details ============
+UUID: fb9dad89-b15b-47ad-8d88-76d82f85d8e1
+Type: target_image
+Image filename: /var/lib/imagefactory/storage/fb9dad89-b15b-47ad-8d88-76d82f85d8e1.body
+Image build completed SUCCESSFULLY!
+
+        '''
+        
+
         cmd = "time imagefactory --debug target_image --id %s %s " % (uuid, self.target)
         self.log.info("Running imagefactory: '%s'" % cmd)
         (out, err) = self.run_timed_command(cmd)
@@ -198,6 +208,16 @@ class ImgFacBuild(object):
         return uuid
 
     def run_imagefactory_provider(self, uuid):
+        '''
+        ============ Final Image Details ============
+UUID: 222505c7-f523-4af9-8770-83ba8dc62b67
+Type: provider_image
+Image filename: /var/lib/imagefactory/storage/222505c7-f523-4af9-8770-83ba8dc62b67.body
+Image ID on provider: ami-7c39a814
+Image build completed SUCCESSFULLY!
+        
+        '''
+              
         cmd = "time imagefactory --%s provider_image --id %s %s " % (self.loglevel, uuid, self.target, self.credential)
         self.log.info("Running imagefactory: '%s'" % cmd)
         (out, err) = self.run_timed_command(cmd)
@@ -409,7 +429,7 @@ def main():
 
 
     # Read in config file
-    config=ConfigParser()
+    config=SafeConfigParser(allow_no_value=True)
     if not config_file:
         config_file = default_configfile
     got_config = config.read(config_file)
@@ -473,26 +493,31 @@ def main():
         config.set(profile, 'workdir', workdir )
         config.set(profile, 'fileroot', fileroot )
         config.set(profile, 'templates', files)
+        config.set(profile, 'target', target )
+        config.set(profile, 'provider', provider )
+        config.set(profile, 'credentials', credentials )        
         
         if tdlonly:
             config.set(profile, 'tdlonly', "True")
         else:
             config.set(profile, 'tdlonly', "False")
 
-        if target:
-            config.set(profile, 'target', target )
-        else:
-            config.set(profile, 'target', 'None' )
+        #if target:
+        #    config.set(profile, 'target', target )
+        #else:
+            #config.set(profile, 'target', 'None' )
+        #    config.set(profile, 'target', None )        
         
-        if provider:
-            config.set(profile, 'provider', provider )
-        else:
-            config.set(profile, 'provider', 'None' )
-        
-        if credentials:
-            config.set(profile, 'credentials', credentials )
-        else:
-            config.set(profile, 'credentials', 'None' )        
+        #if provider:
+        #    config.set(profile, 'provider', provider )
+        #else:
+            #config.set(profile, 'provider', 'None' )
+        #    config.set(profile, 'provider', None )        
+
+        #if credentials:
+        #    config.set(profile, 'credentials', credentials )
+        #else:
+        #    config.set(profile, 'credentials', 'None' )        
         
         s = "[%s]" % profile
         for option in config.options(profile):
