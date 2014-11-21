@@ -60,6 +60,20 @@ class ImgFacBuild(object):
             self.target = None
         if self.credentials == 'None':
             self.target = None        
+
+        self.log.debug("%s" % self)
+       
+    def __repr__(self):
+        s = "ImgFacBuild: "
+        s += "fileroot = %s " % self.fileroot
+        s += "target = %s " % self.target
+        s += "provider = %s " % self.provider
+        s += "tdlonly = %s " % self.tdlonly
+        s += "workdir = %s " % self.workdir
+        s += "templates = %s" % self.templates
+        return s
+
+    
         
         
     def build(self):
@@ -163,6 +177,7 @@ class ImgFacBuild(object):
         try:
             baseuuid = self.run_imagefactory_base(self.finaltdl)
             self.log.info("Ran imagefactory base...") 
+            
             if self.target:
                 targetuuid = self.run_imagefactory_target(baseuuid)
                 self.log.info("Ran imagefactory target...")
