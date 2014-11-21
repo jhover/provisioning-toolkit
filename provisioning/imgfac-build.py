@@ -49,8 +49,16 @@ class ImgFacBuild(object):
         self.workdir = os.path.expanduser(config.get(profile,'workdir'))
         self.fileroot = os.path.expanduser(config.get(profile,'fileroot'))
         self.target = config.get(profile, 'target')
-        self.provider = config.get(profile,'provider')
+        self.provider = config.get(profile,'provider')    
         self.credentials = os.path.expanduser(config.get(profile, 'credentials'))
+        
+        # Fix None values.  
+        if self.target == 'None':
+            self.target = None
+        if self.provider == 'None':
+            self.target = None
+        if self.credentials == 'None':
+            self.target = None        
         
         
     def build(self):
@@ -429,7 +437,8 @@ def main():
 
 
     # Read in config file
-    config=SafeConfigParser(allow_no_value=True)
+    #config=SafeConfigParser(allow_no_value=True)
+    config=SafeConfigParser()
     if not config_file:
         config_file = default_configfile
     got_config = config.read(config_file)
@@ -493,31 +502,31 @@ def main():
         config.set(profile, 'workdir', workdir )
         config.set(profile, 'fileroot', fileroot )
         config.set(profile, 'templates', files)
-        config.set(profile, 'target', target )
-        config.set(profile, 'provider', provider )
-        config.set(profile, 'credentials', credentials )        
+        #config.set(profile, 'target', target )
+        #config.set(profile, 'provider', provider )
+        #config.set(profile, 'credentials', credentials )        
         
         if tdlonly:
             config.set(profile, 'tdlonly', "True")
         else:
             config.set(profile, 'tdlonly', "False")
 
-        #if target:
-        #    config.set(profile, 'target', target )
-        #else:
-            #config.set(profile, 'target', 'None' )
+        if target:
+            config.set(profile, 'target', target )
+        else:
+            config.set(profile, 'target', 'None' )
         #    config.set(profile, 'target', None )        
         
-        #if provider:
-        #    config.set(profile, 'provider', provider )
-        #else:
-            #config.set(profile, 'provider', 'None' )
+        if provider:
+            config.set(profile, 'provider', provider )
+        else:
+            config.set(profile, 'provider', 'None' )
         #    config.set(profile, 'provider', None )        
 
-        #if credentials:
-        #    config.set(profile, 'credentials', credentials )
-        #else:
-        #    config.set(profile, 'credentials', 'None' )        
+        if credentials:
+            config.set(profile, 'credentials', credentials )
+        else:
+            config.set(profile, 'credentials', 'None' )        
         
         s = "[%s]" % profile
         for option in config.options(profile):
