@@ -420,7 +420,7 @@ def main():
     argv = sys.argv[1:]
     try:
         opts, args = getopt.getopt(argv, 
-                                   "hdvc:t:r:L:o:w:Tp:", 
+                                   "hdvc:t:r:L:o:w:Tp:P:C:", 
                                    ["help", 
                                     "debug", 
                                     "verbose",
@@ -431,7 +431,9 @@ def main():
                                     "outfile=",
                                     "workdir=",
                                     "tdl",
-                                    "profile",
+                                    "profile=",
+                                    "provider=",
+                                    "credentials=",
                                     ])
     except getopt.GetoptError, error:
         print( str(error))
@@ -459,8 +461,10 @@ def main():
             tdlonly = True
         elif opt in ("-p", "--profile"):
             profile = arg
-
-
+        elif opt in ("-P", "--provider"):
+            provider = arg
+        elif opt in ("-C", "--credentials"):
+            credentials = arg
 
     # Read in config file
     #config=SafeConfigParser(allow_no_value=True)
