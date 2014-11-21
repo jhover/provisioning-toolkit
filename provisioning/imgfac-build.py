@@ -52,16 +52,14 @@ class ImgFacBuild(object):
         self.target = config.get(profile,'target')
         self.provider = config.get(profile,'provider')    
         self.credentials = os.path.expanduser(config.get(profile, 'credentials'))
-
-        self.log.debug("%s" % self)
-        
+      
         # Fix None values.  
-        if self.target == 'None':
+        if self.target == 'None': 
             self.target = None
         if self.provider == 'None':
-            self.target = None
+            self.provider = None
         if self.credentials == 'None':
-            self.target = None        
+            self.credentials = None        
 
         self.log.debug("%s" % self)
        
