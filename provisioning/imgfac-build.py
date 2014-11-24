@@ -196,12 +196,12 @@ class ImgFacBuild(object):
     
     def run_imagefactory_base(self, tdlfile):
         '''
-    out:    
-    ============ Final Image Details ============
-    UUID: aee9b860-c067-4ad8-8622-55a785dd96f4
-    Type: target_image
-    Status: COMPLETE
-    Status Details: {'error': None, 'activity': 'Target Image build complete'}
+============ Final Image Details ============
+UUID: 2b0896cf-6f2e-44fc-873b-05a7b5aa434f
+Type: base_image
+Image filename: /var/lib/imagefactory/storage/2b0896cf-6f2e-44fc-873b-05a7b5aa434f.body
+Image build completed SUCCESSFULLY!
+
        
         '''
         cmd = "time imagefactory --debug base_image %s " % (tdlfile)
@@ -300,6 +300,7 @@ Image build completed SUCCESSFULLY!
 
     def parse_imagefactory_return(self, text):
         uuid = None
+        imgtype = None
         buf = StringIO.StringIO(text)
         for line in buf.readlines():
             #self.log.debug("line is %s" % line)
@@ -308,9 +309,11 @@ Image build completed SUCCESSFULLY!
             if h1 == 'UUID':
                 #print("h1 does equal 'UUID'")
                 uuid = line[6:].strip()
-        if uuid is not None:
-            self.log.info("Parsed UUID: %s" % uuid)
-            return (True, uuid)
+            if h1 == 'Type':
+                imgtype = line[6:].strip()
+        if uuid is not None and imgtype is not None:
+            self.log.info("Parsed Type: %s UUID: %s" % (imgtype, uuid))
+            return (imgtype, uuid)
         else:
             self.log.error("failed to parse UUID from text: %s" % text)
             return (None, None)
