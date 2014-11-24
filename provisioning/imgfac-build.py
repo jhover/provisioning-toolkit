@@ -20,23 +20,37 @@ import time
 from ConfigParser import SafeConfigParser
 
 class ImgfacBuildBaseException(Exception):
-    def __init__(self, value):
+    def __init__(self, value=None):
         self.value = value
     def __str__(self):
         return repr(self.value)
 
 class ImgfacBuildTargetException(Exception):
-    def __init__(self, value):
+    def __init__(self, value=None):
         self.value = value
     def __str__(self):
         return repr(self.value)
 
 class ImgfacBuildProviderException(Exception):
-    def __init__(self, value):
+    def __init__(self, value=None):
         self.value = value
     def __str__(self):
         return repr(self.value)
 
+class ImgFacReturn(object):
+    def __init__(self, itype, uuid, filename, provid=None):
+        self.itype = itype
+        self.uuid = uuid
+        self.filename = filename
+        self.provid = provid
+
+    def __repr__(self):
+        s = "ImgFacReturn: "
+        s += "type = %s " % self.itype
+        s += "uuid = %s " % self.uuid
+        s += "filename = %s " % self.filename
+        s += "provider_id|ami = %s " % self.provid
+        return s
 
 class ImgFacBuild(object):
     
@@ -201,16 +215,19 @@ UUID: 2b0896cf-6f2e-44fc-873b-05a7b5aa434f
 Type: base_image
 Image filename: /var/lib/imagefactory/storage/2b0896cf-6f2e-44fc-873b-05a7b5aa434f.body
 Image build completed SUCCESSFULLY!
-
        
         '''
         cmd = "time imagefactory --debug base_image %s " % (tdlfile)
         self.log.info("Running imagefactory: '%s'" % cmd)
         (out, err) = self.run_timed_command(cmd)
-        (status, uuid) = self.parse_imagefactory_return(out)
-        if status is not True:
-            raise ImgfacBuildBaseException("Status was %s, error: %s" % (status, err))
-        return uuid        
+        ret = self.parse_imagefactory_return(out)
+        if ret:
+            self.log.info("Ran imagefactory base_image. UUID=" % ret.uuid)
+            self.log.debug("%s" % ret)
+            return ret.uuid
+        else:
+            raise ImgfacBuildBaseException()
+       
     
     def run_imagefactory_target(self, uuid):
         '''
@@ -226,10 +243,13 @@ Image build completed SUCCESSFULLY!
         cmd = "time imagefactory --debug target_image --id %s %s " % (uuid, self.target)
         self.log.info("Running imagefactory: '%s'" % cmd)
         (out, err) = self.run_timed_command(cmd)
-        (status, uuid) = self.parse_imagefactory_return(out)
-        if status is not True:
-            raise ImgfacBuildTargetException("Status was %s, error: %s" % (status, err))
-        return uuid
+        ret = self.parse_imagefactory_return(out)
+        if ret:
+            self.log.info("Ran imagefactory target_image. UUID=" % ret.uuid)
+            self.log.debug("%s" % ret)
+            return ret.uuid
+        else:
+            raise ImgfacBuildTargetException()
 
     def run_imagefactory_provider(self, uuid):
         '''
@@ -250,12 +270,15 @@ Image build completed SUCCESSFULLY!
                                                                         self.credentials)
         self.log.info("Running imagefactory: '%s'" % cmd)
         (out, err) = self.run_timed_command(cmd)
-        (status, uuid) = self.parse_imagefactory_return(out)
+        ret = self.parse_imagefactory_return(out)
         
-        if status is not True:
-            raise ImgfacBuildProviderException("Status was %d, error: %s" % (status, err))
+        if ret:
+            self.log.info("Provider image created. Provider ID: %s " % ret.provid)
+            self.log.debug("%s" % ret)
+            return ret.provid
         else:
-            self.log.info("Provider image done.")
+            raise ImgfacBuildProviderException()
+           
                    
 
     def run_timed_command(self, cmd):
@@ -299,25 +322,39 @@ Image build completed SUCCESSFULLY!
 
 
     def parse_imagefactory_return(self, text):
+        '''
+        Parses imagefactory text output. 
+        Returns ImgFacReturn with info filled in. 
+        
+        '''
         uuid = None
         imgtype = None
+        filename = None
+        provid = None
         buf = StringIO.StringIO(text)
         for line in buf.readlines():
             #self.log.debug("line is %s" % line)
             h1 = line[:4]
+            h2 = line[:14]
+            h3 = line[:20]
             #print("h1 is '%s'" % h1)
             if h1 == 'UUID':
                 #print("h1 does equal 'UUID'")
                 uuid = line[6:].strip()
             if h1 == 'Type':
                 imgtype = line[6:].strip()
+            if h2 == 'Image filename':
+                filename = line[16:].strip()
+            if h3 == 'Image ID on provider':
+                provid = line[22:].strip()
+        
         if uuid is not None and imgtype is not None:
             self.log.info("Parsed Type: %s UUID: %s" % (imgtype, uuid))
-            return (imgtype, uuid)
+            ifr = ImgFacReturn(imgtype, uuid, filename, provid)
+            return ifr
         else:
             self.log.error("failed to parse UUID from text: %s" % text)
-            return (None, None)
-
+            return None
 
     def parse_imagefactory_return_old(self, text):
         uuid = None
