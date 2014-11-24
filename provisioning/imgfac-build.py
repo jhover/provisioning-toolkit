@@ -222,7 +222,7 @@ Image build completed SUCCESSFULLY!
         (out, err) = self.run_timed_command(cmd)
         ret = self.parse_imagefactory_return(out)
         if ret:
-            self.log.info("Ran imagefactory base_image. UUID=" % ret.uuid)
+            self.log.info("Ran imagefactory base_image. UUID= %s" % ret.uuid)
             self.log.debug("%s" % ret)
             return ret.uuid
         else:
@@ -245,7 +245,7 @@ Image build completed SUCCESSFULLY!
         (out, err) = self.run_timed_command(cmd)
         ret = self.parse_imagefactory_return(out)
         if ret:
-            self.log.info("Ran imagefactory target_image. UUID=" % ret.uuid)
+            self.log.info("Ran imagefactory target_image. UUID= %s" % ret.uuid)
             self.log.debug("%s" % ret)
             return ret.uuid
         else:
@@ -273,7 +273,7 @@ Image build completed SUCCESSFULLY!
         ret = self.parse_imagefactory_return(out)
         
         if ret:
-            self.log.info("Provider image created. Provider ID: %s " % ret.provid)
+            self.log.info("Provider image created. Provider ID= %s " % ret.provid)
             self.log.debug("%s" % ret)
             return ret.provid
         else:
