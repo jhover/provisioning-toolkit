@@ -1,10 +1,24 @@
 #!/bin/bash
-
 ##=====================##
 ## Alexandr S. Zaytsev ##
 ## BNL, RACF (C) 2014 =##
 ## alezayt@bnl.gov ====##
 ##=====================##
+# Designed to be copied to a temporary Amazon instance which is expected 
+# to have two devices attached:
+#   /dev/sdm (/dev/xvdm) - volume containing source PV image
+#   /dev/sdo (/dev/xvdo) - destination volume to which the HVM image is written
+#
+# (the default device names can be altered by supplying the script with two 
+# non-empty arguments: 
+#  img-conv-pv2hvm.sh {source-device} {destination device}
+#      e.g.: './img-conv-pv2hvm.sh xvdj xvdk')
+#
+# Since the conversion procedure is slightly altering the content of source 
+# device too (due to some recommended optimizations prior to copying the volume) 
+# both attached volumes should be specifically created for the purpose of 
+# running a conversion. 
+#
 
 dev_in=xvdm
 dev_out=xvdo
@@ -98,7 +112,7 @@ echo -e "\n--- done"
 
 # --------------------------------------------------------
 
-echo -e "### Labling and unmounting destination device (/dev/${dev_out})..."
+echo -e "### Labeling and unmounting destination device (/dev/${dev_out})..."
 
 e2label /dev/${dev_out}1 /
 sync
