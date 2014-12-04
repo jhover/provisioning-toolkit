@@ -30,6 +30,7 @@ for f in filelist:
     s = "Image: "
     s += " %s " % ftime
     s+= " %s " % data['identifier']
+    s+= " %s " % data['status']
     
     template = data['template']
     if template:
@@ -49,4 +50,4 @@ for f in filelist:
     print(s)
 
 
-
+# status  FAILED
