@@ -62,7 +62,7 @@ class ImgFacBuild(object):
         self.tdlonly = config.getboolean(profile,'tdlonly')
         self.templates = config.get(profile, 'templates')
         self.templates = self.templates.split(',')
-        self.templates = map(str.strip, self.templates)
+        self.templates = [item.strip() for item in self.templates]
         self.workdir = os.path.expanduser(config.get(profile,'workdir'))
         self.fileroot = os.path.expanduser(config.get(profile,'fileroot'))
         self.target = config.get(profile,'target')
