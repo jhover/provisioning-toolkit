@@ -12,7 +12,6 @@ import logging
 import os
 import shutil
 import StringIO
-import str
 import sys
 import subprocess
 import tempfile
