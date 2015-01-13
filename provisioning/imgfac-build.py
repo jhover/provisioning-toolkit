@@ -114,7 +114,8 @@ class ImgFacBuild(object):
             yamlfile = "%s.files.yaml" % name
             self.log.debug("yamlfile=%s" % yamlfile )
             yfp = "%s/%s" % (p, yamlfile)
-            self.log.debug("checking if %s exists..." % yfp  ) 
+            curdir = os.getcwd()
+            self.log.debug("checking if %s exists from cwd %s" % (yfp, curdir)  ) 
             destname = "%s/%s.files.tdl" % (self.workdir, name)
             if os.path.exists(yfp):
                 self.log.debug("yep. running embed_files...")
