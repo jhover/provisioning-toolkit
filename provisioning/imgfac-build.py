@@ -126,7 +126,8 @@ class ImgFacBuild(object):
                 self.log.debug('out = %s' % out)
                 self.log.debug('err = %s' % err)
             else:
-                self.log.debug("No <name>.files.yaml file so doing nothing.")
+                curdir = os.getcwd()
+                self.log.debug("No %s file in CWD %s so doing nothing." % (yfp, curdir))
     
     def make_withfiles(self):
         '''
