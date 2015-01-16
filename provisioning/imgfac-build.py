@@ -291,7 +291,7 @@ Image build completed SUCCESSFULLY!
         #
         my_stdout = tempfile.NamedTemporaryFile(prefix='imgfac-build-out-', delete=False)        
         my_stderr = tempfile.NamedTemporaryFile(prefix='imgfac-build-err-', delete=False)
-        self.log.info("Subcommand output in %s error in %s" % ( my_stdout.name, my_stderr.name))
+        self.log.info("Subcommand stdout: %s stderr: %s" % ( my_stdout.name, my_stderr.name))
         self.log.debug("cmd is %s" % cmd)
         p = subprocess.Popen(cmd, stdout=my_stdout, stderr=my_stderr, shell=True)
         self.log.debug("Command running...")
