@@ -116,7 +116,7 @@ class ImgFacBuild(object):
             self.log.debug("yamlfile=%s" % yamlfile )
             yfp = "%s/%s" % (p, yamlfile)
             curdir = os.getcwd()
-            self.log.debug("checking if file '%s' exists from cwd '%s'" % (yfp, curdir)  ) 
+            self.log.debug("checking if file '%s' exists from CWD '%s'" % (yfp, curdir)  ) 
             destname = "%s/%s.files.tdl" % (self.workdir, name)
             if os.path.exists(yfp):
                 self.log.debug("yep. running embed_files...")
@@ -128,7 +128,7 @@ class ImgFacBuild(object):
                 self.log.debug('err = %s' % err)
             else:
                 curdir = os.getcwd()
-                self.log.debug("No %s file in CWD %s so doing nothing." % (yfp, curdir))
+                self.log.debug("No '%s' file in CWD '%s' so doing nothing." % (yfp, curdir))
     
     def make_withfiles(self):
         '''
