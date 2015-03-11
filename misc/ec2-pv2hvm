@@ -1,0 +1,460 @@
+#!/bin/bash
+
+##=====================##
+## Alexandr S. Zaytsev ##
+## BNL, RACF (C)  2015 ##
+##   alezayt@bnl.gov   ##
+##=====================##
+
+# --------------------------------------------------------
+# Generic options
+
+ec2_user=ec2-user
+
+dev_in=xvdm
+dev_out=xvdo
+
+conv_script_fn=img-conv-pv2hvm.sh
+conv_script="./${conv_script_fn}"
+conv_script_status_fn="img-conv-pv2hvm.status"
+
+# --------------------------------------------------------
+# Default values for non-mandatory options
+
+snapshot_region="us-east-1"
+conv_av_zone="us-east-1a"
+
+conv_instance_type="m3.xlarge"
+conv_sec_grp_name="launch-wizard-1"
+
+# --------------------------------------------------------
+# Parameters controlling the response to the lateny of EC2 operations
+
+# Period for chacking the duplicated snapshot status, sec
+sleep_t_snap_copy=1
+
+# Period for checking conversion VM spawning status, sec
+sleep_t_instance_ops=10
+
+# Period for checking conversion VM to become accessible via SSH, sec
+sleep_t_instance_ip=10
+
+# Period for checking for completion of the VM snapshot operations, sec
+sleep_t_volume_snap=10
+
+# Period for checking the status of the new AMI being created from a snapshot, sec
+sleep_t_ami_create=10
+
+# Maximum sleep iteration cycles before giving up on any of the operations listed above
+max_sleep_iterations=20
+
+# --------------------------------------------------------
+# Other timeouts
+
+# Waiting period before proceeding with conversion VM termination and snapshots deletion, sec
+sleep_t_before_term_conv_VM=20
+
+# Waiting period between terminating conversion VM and deleting the snaphots, sec
+sleep_t_before_del_snap=10
+
+# --------------------------------------------------------
+# SSH/SCP options
+
+# Conversion VM ssh connection timeout, sec
+ssh_connect_timeout=5
+
+scp_opt_t="-o StrictHostKeyChecking=no -o ConnectTimeout=${ssh_connect_timeout}"
+
+ssh_opt_t="-q ${scp_opt_t}"
+
+# --------------------------------------------------------
+# Parsing command line options
+
+if [ -z "$1" ]; then
+    echo -e "### Error: mandatory first option (<source_ami_id> or {-h|--help}) is not specified! Exiting..."
+    exit 127
+else
+
+    if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+
+        echo "Usage: ec2-pv2hvm {-h|--help}"
+        echo "       ec2-pv2hvm [source_ami_id] [conv_instance_ami_name] [destination_ami_name] [conv_keypair_name]"
+        echo "                  {conv_sec_grp_name} {conv_instance_type} {snapshot_region} {conv_av_zone}"
+        echo
+        echo "Converts a PV image identified by the <source_ami_id> via instantiating a temporary HVM VM using"
+        echo "the image identified by the <conv_instance_ami_name>. The temporary converter VM of type identified"
+        echo "by the <conv_instance_type> is instantiated in the availability zone identified by the [conv_av_zone]"
+        echo "and provided with the keypair identified by the [conv_keypair_name]."
+        echo
+        echo "+ It is assumed that the keypair identified by the <conv_keypair_name> that it is already associated"
+        echo "  with the session running the script, allowing a passwordless login to the converter VM."
+        echo
+        echo "+ Temporary snapshots of the source PV image are created in the zone identified by the <snapshot_region>."
+        echo
+        echo "+ Destination HVM AMI produced is given the name specified by the <destination_ami_name>."
+        echo
+        echo "+ The part of conversion process taking place inside the temporary VM instances is handled by"
+        echo "the external script \"$conv_script\" deployed and executed inside the VM."
+        echo
+        echo "Default option values: <conv_sec_grp_name>=${conv_sec_grp_name}"
+        echo "                       <conv_instance_type>=${conv_instance_type}"
+        echo "                       <snapshot_region>=${snapshot_region}"
+        echo "                       <conv_av_zone>=${conv_av_zone}"
+
+        exit 0
+
+    fi
+
+    source_ami_id=$1
+
+fi
+
+if [ -z "$2" ]; then
+    echo -e "### Error: mandatory option <conv_instance_ami_name> (#2) is not specified! Exiting..."
+    exit 127
+else
+    conv_instance_ami_name=$2
+fi
+
+if [ -z "$3" ]; then
+    echo -e "### Error: mandatory option <destination_ami_name> (#3) is not specified! Exiting..."
+    exit 127
+else
+    destination_ami_name=$3
+fi
+
+if [ -z "$4" ]; then
+    echo -e "### Error: mandatory option <conv_keypair_name> (#4) is not specified! Exiting..."
+    exit 127
+else
+    conv_keypair_name=$4
+fi
+
+[ ! -z "$5" ] && conv_sec_grp_name=$5
+[ ! -z "$6" ] && snapshot_region=$6
+[ ! -z "$7" ] && conv_instance_type=$7
+[ ! -z "$8" ] && conv_av_zone=$8
+
+# --------------------------------------------------------
+# Verifying external conversion script
+
+if [ ! -f $conv_script ]; then
+    echo -e "### Error: external conversion script \"$conv_script\" not found! Exiting..."
+    exit 127
+fi
+
+if [ ! -x $conv_script ]; then
+    echo -e "### Error: external conversion script \"$conv_script\" is not an executable! Exiting..."
+    exit 127
+fi
+
+# --------------------------------------------------------
+# Verifying EC2 environment setup and ec2 tools availability
+
+if [ -z "$EC2_ACCESS_KEY" ] || [ -z "$AWS_ACCESS_KEY" ] || [ -z "$EC2_SECRET_KEY" ] || [ -z "$AWS_SECRET_KEY" ] || [ -z "$EC2_URL" ] || [ -z "$S3_URL" ] || [ -z "$AWS_CREDENTIAL_FILE" ]; then
+    echo -e "### Error: Amazon EC2 environment variables are incomplete, unable to continue! Exiting..."
+    exit 127
+fi
+
+for ec2tmp_t in ec2-copy-snapshot ec2-create-snapshot ec2-describe-snapshots ec2-delete-snapshot ec2-describe-images ec2-create-image \
+ec2-run-instances ec2-describe-instances ec2-terminate-instances ec2-describe-group ec2-register ec2-describe-keypairs; do
+
+    which $ec2tmp_t >& /dev/null
+    if [ $? != 0 ]; then
+        echo -e "### Error: Amazon EC2 tool set is incomplete - \"$ec2tmp_t\" is missing! Exiting..."
+        exit 127
+    fi
+
+done
+
+# --------------------------------------------------------
+# Dump main options
+
+echo
+echo "###### PV2HVM Sequence Initiated ######"
+echo
+echo "### Option parsing is complete:"
+echo "  +          source_ami_id = \"$source_ami_id\""
+echo "  + conv_instance_ami_name = \"$conv_instance_ami_name\""
+echo "  +   destination_ami_name = \"$destination_ami_name\""
+echo "  +      conv_keypair_name = \"$conv_keypair_name\""
+echo "  +      conv_sec_grp_name = \"$conv_sec_grp_name\""
+echo "  +        snapshot_region = \"$snapshot_region\""
+echo "  +     conv_instance_type = \"$conv_instance_type\""
+echo "  +           conv_av_zone = \"$conv_av_zone\""
+
+# --------------------------------------------------------
+# Check source AMI, destination AMI name uniquness, temporary VM AMI, keypair, and the security group
+
+echo -e "\n### Source PV image status [ID=\"$source_ami_id\"]:"
+out_source_ami_id=`ec2-describe-images $source_ami_id`
+if [ -z "$out_source_ami_id" ]; then
+    echo -e "\n### Error: source PV image \"$source_ami_id\" is missing! Exiting..."
+    exit 127
+fi
+echo -e "$out_source_ami_id"|sed 's/^/  + /'
+
+echo -e "\n### Conversion VM image status [name=\"$conv_instance_ami_name\"]:"
+conv_instance_ami_id=`ec2-describe-images|grep $conv_instance_ami_name|grep ami|cut -f 2`
+if [ -z "$conv_instance_ami_id" ]; then
+    echo -e "\n### Error: conversion VM image \"$conv_instance_ami_name\" is missing! Exiting..."
+    exit 127
+fi
+ec2-describe-images $conv_instance_ami_id|sed 's/^/  + /'
+
+echo -e "\n### Checking the uniquness of destination image name [name=\"$destination_ami_name\"]:"
+dst_ami_id=`ec2-describe-images|grep $destination_ami_name|grep ami|cut -f 2`
+if [ ! -z "$dst_ami_id" ]; then
+    echo -e "\n### Error: AMI named \"$destination_ami_name\" already exists and has ID=\"$dst_ami_id\" - the name must be unique! Exiting..."
+    exit 127
+fi
+ec2-describe-images $conv_instance_ami_id|sed 's/^/  + /'
+
+echo -e "\n### Keypair [name=\"$conv_keypair_name\"]:"
+out_conv_keypair_name=`ec2-describe-keypairs $conv_keypair_name`
+if [ -z "$out_conv_keypair_name" ]; then
+    echo -e "\n### Error: keypair \"$conv_keypair_name\" is missing! Exiting..."
+    exit 127
+fi
+echo -e "$out_conv_keypair_name"|sed 's/^/  + /'
+
+echo -e "\n### Security group [name=\"$conv_sec_grp_name\"]:"
+out_conv_sec_grp_name=`ec2-describe-group $conv_sec_grp_name`
+conv_sec_grp_id=`ec2-describe-group $conv_sec_grp_name|grep sg-|cut -f 2`
+if [ -z "$out_conv_sec_grp_name" ] || [ -z "$conv_sec_grp_id" ]; then
+    echo -e "\n### Error: security group \"$conv_sec_grp_name\" is missing! Exiting..."
+    exit 127
+fi
+echo -e "$out_conv_sec_grp_name"|sed 's/^/  + /'
+
+# --------------------------------------------------------
+# Create temporary snapshots
+
+source_ami_snap_id=`ec2-describe-images $source_ami_id|grep snap|cut -f 5`
+if [ -z "$source_ami_snap_id" ]; then
+    echo -e "\n### Error: unable to extract snapshot ID from PV source image \"$source_ami_id\"! Exiting..."
+    exit 127
+fi
+
+echo -e "\n### Creating temporary snapshot replicas from source snapshot \"$source_ami_snap_id\""
+
+snap_r1=`ec2-copy-snapshot -r $snapshot_region -s $source_ami_snap_id|grep snap|cut -f 2`
+snap_r2=`ec2-copy-snapshot -r $snapshot_region -s $source_ami_snap_id|grep snap|cut -f 2`
+
+echo -n "Waiting for snapshot creation operations to complete: "
+it_counter=0
+while true; do
+
+    let it_counter=$(($it_counter+1))
+    if [ $it_counter -gt $max_sleep_iterations ]; then
+        echo -e "\n### Error: maximum of ${max_sleep_iterations}x $sleep_t_snap_copy sec iterations is reached - requesting the snapshots to be deleted and exiting..."
+        ec2-delete-snapshot $snap_r1
+        ec2-delete-snapshot $snap_r2
+        exit 126
+    fi
+
+    status_snap_r1=`ec2-describe-snapshots $snap_r1|grep snap|cut -f 4`
+    status_snap_r2=`ec2-describe-snapshots $snap_r2|grep snap|cut -f 4`
+    [ "$status_snap_r1" == "completed" ] && [ "$status_snap_r2" == "completed" ] && break
+    echo -n "."
+
+    sleep $sleep_t_snap_copy
+
+done
+echo " completed."
+
+echo "Snapshots [ $snap_r1 ] and [ $snap_r2 ] are now available."
+
+# --------------------------------------------------------
+# Instantiate a conversion VM
+
+echo -e "\n### Instatiating conversion VM with AMI [ $conv_instance_ami_id ]:"
+
+out_run_inst=`ec2-run-instances $conv_instance_ami_id -k $conv_keypair_name -g $conv_sec_grp_id -t $conv_instance_type -z $conv_av_zone \
+-b /dev/${dev_in}=$snap_r1 -b /dev/${dev_out}=$snap_r2 --instance-initiated-shutdown-behavior terminate --ebs-optimized`
+
+conv_VM_id=`echo -e "$out_run_inst"|grep INSTANCE|cut -f 2`
+
+echo -en "Waiting for the instance [ $conv_VM_id ] to enter running state: "
+it_counter=0
+while true; do
+
+    let it_counter=$(($it_counter+1))
+    if [ $it_counter -gt $max_sleep_iterations ]; then
+        echo -e "\n### Error: maximum of ${max_sleep_iterations}x $sleep_t_instance_ops sec iterations is reached - requesting the conversion VM termination and snapshot deletion and exiting..."
+        ec2-terminate-instances $conv_VM_id;sleep $sleep_t_before_del_snap;ec2-delete-snapshot $snap_r1;ec2-delete-snapshot $snap_r2
+        exit 126
+    fi
+
+    status_conv_VM=`ec2-describe-instances $conv_VM_id|grep INSTANCE|cut -f 6`
+    [ "$status_conv_VM" == "running" ] && break
+    echo -n "."
+
+    sleep $sleep_t_instance_ops
+
+done
+conv_VM_pub_IP=`ec2-describe-instances $conv_VM_id|grep INSTANCE|cut -f 17`
+echo " VM [ $conv_VM_pub_IP ] is now running"
+
+echo -en "Waiting for the instance [ $conv_VM_id ] to become accessible via SSH: "
+it_counter=0
+while true; do
+
+    let it_counter=$(($it_counter+1))
+    if [ $it_counter -gt $max_sleep_iterations ]; then
+        echo -e "\n### Error: maximum of ${max_sleep_iterations}x $sleep_t_instance_ip sec iterations is reached - requesting the conversion VM termination and snapshot deletion and exiting..."
+        ec2-terminate-instances $conv_VM_id;sleep $sleep_t_before_del_snap;ec2-delete-snapshot $snap_r1;ec2-delete-snapshot $snap_r2
+        exit 126
+    fi
+
+    ssh ${ssh_opt_t} ${ec2_user}@${conv_VM_pub_IP} "hostname" >& /dev/null
+    [ $? == 0 ] && break 
+    echo -n "."
+
+    sleep $sleep_t_instance_ip
+
+done
+echo " VM [ $conv_VM_pub_IP ] is sccessible via SSH"
+
+# --------------------------------------------------------
+# Deploying the conversion script on a VM and executing it
+
+echo -e "\n### Deploying the conversion script on the VM [ $conv_VM_pub_IP ]:"
+scp ${scp_opt_t} $conv_script ${ec2_user}@${conv_VM_pub_IP}:~/
+
+echo -e "\n### Running the conversion script on the VM [ $conv_VM_pub_IP ]:"
+
+echo
+echo "#########################################################################################################"
+echo "#########################################################################################################"
+echo
+
+ssh -t ${ssh_opt_t} ${ec2_user}@${conv_VM_pub_IP} "sudo ~/$conv_script_fn"|sed 's/^/  + /'
+
+echo
+echo "#########################################################################################################"
+echo "#########################################################################################################"
+
+op_status=`ssh ${ssh_opt_t} ${ec2_user}@${conv_VM_pub_IP} "cat ~/$conv_script_status_fn"`
+
+echo -e "\n### Conversion procedure is finished on the VM [ $conv_VM_pub_IP ]; the operation status is: \"$op_status\""
+
+if [ "$op_status" != "success" ]; then
+
+    echo -e "\n### Error: image conversion operation was NOT succesfull; requesting the conversion VM termination and snapshot deletion and exiting..."
+
+    echo -e "\n### The script will now sleep for $sleep_t_before_term_conv_VM sec before terminating the conversion VM and deleting the utility snapshots"
+    echo      "+++ If you are running this script interactively and wish to preserve the conversion VM for debuggin purposes, terminate the scipts now."
+    echo      "+++ You may use the following commands later to perform the cleanup operation:"
+    echo
+    echo      "ec2-terminate-instances $conv_VM_id"
+    echo      "ec2-delete-snapshot $snap_r1"
+    echo      "ec2-delete-snapshot $snap_r2"
+
+    echo -n "Waiting: "
+    it_counter=0
+    while true; do
+        let it_counter=$(($it_counter+1))
+        [ $it_counter -gt $sleep_t_before_term_conv_VM ] && break
+        echo -n "."
+        sleep 1
+    done
+    echo "done"
+
+    ec2-terminate-instances $conv_VM_id;sleep $sleep_t_before_del_snap;ec2-delete-snapshot $snap_r1;ec2-delete-snapshot $snap_r2
+
+    exit 125
+
+fi
+
+# --------------------------------------------------------
+# Creating a snapshot of the destination volume and then the new AMI from that volume
+
+conv_VM_dst_vol_id=`ec2-describe-instances $conv_VM_id|grep BLOCKDEVICE|grep $dev_out|cut -f 3`
+
+echo -en "\n### Creating a snapshot of the destination volume [ $conv_VM_dst_vol_id ]: "
+snap_dst=`ec2-create-snapshot $conv_VM_dst_vol_id|grep snap|cut -f 2`
+
+it_counter=0
+while true; do
+
+    let it_counter=$(($it_counter+1))
+    if [ $it_counter -gt $max_sleep_iterations ]; then
+        echo -e "\n### Error: maximum of ${max_sleep_iterations}x $sleep_t_volume_snap sec iterations is reached - requesting the conversion VM termination and snapshot deletion and exiting..."
+        ec2-terminate-instances $conv_VM_id;sleep $sleep_t_before_del_snap;ec2-delete-snapshot $snap_r1;ec2-delete-snapshot $snap_r2;ec2-delete-snapshot $snap_dst
+        exit 126
+    fi
+
+    status_snap_dst=`ec2-describe-snapshots $snap_dst|grep snap|cut -f 4`
+    [ "$status_snap_dst" == "completed" ] && break
+    echo -n "."
+
+    sleep $sleep_t_volume_snap
+
+done
+echo " completed."
+
+echo "Snapshots [ $snap_dst ] is now available."
+
+echo
+echo "#########################################################################################################"
+echo "#########################################################################################################"
+echo
+
+echo -e "### Creting a new AMI from snapshot [ $snap_dst ]: "
+output_ami_id=`ec2-register -n $destination_ami_name  -d "pv2hvm conversion of PV $source_ami_id image" -s $snap_dst --virtualization-type hvm -a x86_64|grep IMAGE|cut -f 2`
+
+ec2-describe-images $output_ami_id
+
+if [ $? != 0 ]; then
+    echo -e "### Error: failed to create new AMI from snapshot [ $snap_dst ] - requesting the conversion VM termination and snapshot deletion and exiting...
+    ec2-terminate-instances $conv_VM_id;sleep $sleep_t_before_del_snap;ec2-delete-snapshot $snap_r1;ec2-delete-snapshot $snap_r2;ec2-delete-snapshot $snap_dst"
+    exit 124
+fi
+
+echo -e "\nAMI [ $output_ami_id ] is now available."
+
+echo
+echo "#########################################################################################################"
+echo "#########################################################################################################"
+
+# --------------------------------------------------------
+# Deleting conversion VM and the temporary snapshots
+
+echo -e "\n### The script will now sleep for $sleep_t_before_term_conv_VM sec before terminating the conversion VM and deleting the utility snapshots"
+echo      "+++ If you are running this script interactively and wish to preserve the conversion VM for some reson, terminate the scipts now."
+echo      "+++ You may use the following commands later to perform the cleanup operation:"
+echo
+echo      "ec2-terminate-instances $conv_VM_id"
+echo      "ec2-delete-snapshot $snap_r1"
+echo      "ec2-delete-snapshot $snap_r2"
+
+echo -n "Waiting: "
+it_counter=0
+while true; do
+    let it_counter=$(($it_counter+1))
+    [ $it_counter -gt $sleep_t_before_term_conv_VM ] && break
+    echo -n "."
+    sleep 1
+done
+echo "done"
+
+echo -e "\n### Terminating instance [ $conv_VM_id ]:"
+ec2-terminate-instances $conv_VM_id
+sleep $sleep_t_before_del_snap
+
+echo -e "### Deleting snapshot [ $snap_r1 ]:"
+ec2-delete-snapshot $snap_r1
+
+echo -e "### Deleting snapshot [ $snap_r2 ]:"
+ec2-delete-snapshot $snap_r2
+
+sleep 1
+
+# --------------------------------------------------------
+
+echo -e "\n### Output HVM AMI [ $output_ami_id ]"
+
+echo -e "\nDone."
+
+exit 0

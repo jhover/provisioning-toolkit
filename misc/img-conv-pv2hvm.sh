@@ -1,33 +1,48 @@
 #!/bin/bash
-##=====================##
-## Alexandr S. Zaytsev ##
-## BNL, RACF (C) 2014 =##
-## alezayt@bnl.gov ====##
-##=====================##
-# Designed to be copied to a temporary Amazon instance which is expected 
-# to have two devices attached:
-#   /dev/sdm (/dev/xvdm) - volume containing source PV image
-#   /dev/sdo (/dev/xvdo) - destination volume to which the HVM image is written
-#
-# (the default device names can be altered by supplying the script with two 
-# non-empty arguments: 
-#  img-conv-pv2hvm.sh {source-device} {destination device}
-#      e.g.: './img-conv-pv2hvm.sh xvdj xvdk')
-#
-# Since the conversion procedure is slightly altering the content of source 
-# device too (due to some recommended optimizations prior to copying the volume) 
-# both attached volumes should be specifically created for the purpose of 
-# running a conversion. 
-#
+
+##=========================##
+##   Alexandr S. Zaytsev   ##
+## BNL, RACF (C) 2014-2015 ##
+##     alezayt@bnl.gov     ##
+##=========================##
 
 dev_in=xvdm
 dev_out=xvdo
 
-umount /mnt 2> /dev/null
+# --------------------------------------------------------
+
+if [ ! -z "$1" ]; then
+
+    if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+        echo "Usage: img-conv-pv2hvm.sh {-h|--help}"
+        echo "       img-conv-pv2hvm.sh {input_device_name} {output_device_name}"
+        echo
+        echo "Converts a PV image mapped to /dev/<input_device_name> to an HVM image"
+        echo "storing the output to /dev/{output_device_name}. All content of the"
+        echo "destination device is erased in the process without further waring."
+        echo
+        echo "+ Designed to be executed inside the Amazon EC2 instances."
+        echo
+        echo "Default option values: <input_device_name>=${dev_in}"
+        echo "                       <output_device_name>=${dev_out}"
+
+        exit 0
+
+    fi
+
+    dev_in=$1
+
+fi
 
 # --------------------------------------------------------
 
-[ ! -z "$1" ] && dev_in=$1
+if [ ! -d ~ec2-user ]; then
+    echo -e "### Error: ~ec2-user is missing; the execution environment doesn't look like an Amazon EC2 instance! Exiting..."
+    exit 127
+fi
+
+# --------------------------------------------------------
+
 [ ! -z "$2" ] && dev_out=$2
 
 fdisk -l /dev/${dev_in} >& /dev/null
@@ -36,11 +51,29 @@ if [ $? != 0 ]; then
     exit 127
 fi
 
+fdisk -s /dev/${dev_in}1 >& /dev/null
+if [ $? == 0 ]; then
+    echo -e "### Error: source device /dev/${dev_in} has a partition, doesn't look like a PV volume. Exiting..."
+    exit 127
+fi
+
 fdisk -l /dev/${dev_out} >& /dev/null
 if [ $? != 0 ]; then
     echo -e "### Error: destination device /dev/${dev_out} is not attached! Exiting..."
     exit 127
 fi
+
+fdisk -s /dev/${dev_out}2 >& /dev/null
+if [ $? == 0 ]; then
+    echo -e "### Error: destination device /dev/${dev_out} has more than one partition, fails prerequisites. Exiting..."
+    exit 127
+fi
+
+# --------------------------------------------------------
+
+echo "undefined" > ~ec2-user/img-conv-pv2hvm.status
+
+umount /mnt 2> /dev/null
 
 # --------------------------------------------------------
 
@@ -112,7 +145,7 @@ echo -e "\n--- done"
 
 # --------------------------------------------------------
 
-echo -e "### Labeling and unmounting destination device (/dev/${dev_out})..."
+echo -e "### Labling and unmounting destination device (/dev/${dev_out})..."
 
 e2label /dev/${dev_out}1 /
 sync
@@ -123,5 +156,7 @@ echo "--- done"
 # --------------------------------------------------------
 
 echo "### Done."
+
+echo "success" > ~ec2-user/img-conv-pv2hvm.status
 
 exit 0
