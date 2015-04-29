@@ -1,4 +1,5 @@
 
+IMGFAC-BUILD commands
 embed-files -o work/sl6-x86_64-base.files.tdl --fileroot provisioning-templates/files provisioning-templates/sl6-x86_64-base.files.yaml
 
 merge-tdls -o work/sl6-x86_64-base-withfiles.tdl work/sl6-x86_64-base.files.tdl provisioning-templates/sl6-x86_64-base.tdl
@@ -7,6 +8,10 @@ imagefactory --verbose base_image work/sl6-x86_64-base-withfiles.tdl
 
 imagefactory --verbose target_image  -id c9d8b606-2776-439a-b206-1a66c0b8b1a6 openstack-kvm
 
+GLANCE/OPENSTACK UPLOAD
 
 . /home/jhover/nova-essex/novarc
 glance  image-create --name sl6-x86_64-wn-atlas --is-public=False  --disk-format raw --container-format bare --owner bnlcloud < /home/jhover/image/sl6-x86_64-wn-atlas-sda.raw
+
+CONVERTER SCRIPT
+./ec2-pv2hvm ami-a476eccc testhvm atlas-se-hvm jhoverssh launch-wizard-1 us-east-1 us-east-1d
