@@ -14,4 +14,4 @@ GLANCE/OPENSTACK UPLOAD
 glance  image-create --name sl6-x86_64-wn-atlas --is-public=False  --disk-format raw --container-format bare --owner bnlcloud < /home/jhover/image/sl6-x86_64-wn-atlas-sda.raw
 
 CONVERTER SCRIPT
-./ec2-pv2hvm ami-a476eccc testhvm atlas-se-hvm jhoverssh launch-wizard-1 us-east-1 us-east-1d
+./ec2-pv2hvm ami-a476eccc testhvm atlas-se-hvm jhoverssh launch-wizard-12 us-east-1 m3.xlarge us-east-1d
