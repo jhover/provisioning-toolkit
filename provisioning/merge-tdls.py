@@ -47,8 +47,8 @@ class MergeTDLs(object):
             self.outfile.close()
 
     def adddate(self, root):
-        #root = tdltree.getroot()
-        for n in root.iter('name'):
+        root = tdltree.getroot()
+        for n in root.getiterator('name'):
             print n.attrib
         return tdltree
 
