@@ -47,8 +47,10 @@ class MergeTDLs(object):
             self.outfile.close()
 
     def adddate(self, tdltree):
+        now = time.strftime("-%Y-%m-%d-%H%M")
         root = tdltree.getroot()
         n = root.find('name')
+        n.text = "%s%s" % (n.text , now)
         self.log.debug("Name element attrib=%s text=%s" % (n.attrib, n.text ) ) 
         return tdltree
 
