@@ -48,8 +48,8 @@ class MergeTDLs(object):
 
     def adddate(self, tdltree):
         root = tdltree.getroot()
-        for n in root.getiterator(tag='name'):
-            self.log.debug("Name element attrib=%s text=%s" % (n.attrib, n.text ) ) 
+        n = root.find('name')
+        self.log.debug("Name element attrib=%s text=%s" % (n.attrib, n.text ) ) 
         return tdltree
 
     def mergefiles(self):
