@@ -157,7 +157,7 @@ class MergeTDLs(object):
     
     def printelements(self, elem, depth=0):
         indent = "   " * depth
-        s = "\n"
+        s = ""
         if elem.text != None and elem.text.strip() != '':
             s += "%s %s %s: '%s'\n" % (indent, elem.tag, elem.attrib, elem.text.strip())
             #self.log.debug("%s %s %s: '%s'" % (indent, elem.tag, elem.attrib, elem.text.strip()))
