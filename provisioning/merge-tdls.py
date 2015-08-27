@@ -32,7 +32,7 @@ class MergeTDLs(object):
             self.printelements(root)
         self.log.debug("Merging files *******************" % self.files)
         merged = self.mergefiles()
-        merged = self.addate(merged)
+        merged = self.adddate(merged)
                 
         self.log.debug("Printing merged structure *******************")    
         if self.log.isEnabledFor(logging.DEBUG):
