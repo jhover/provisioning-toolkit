@@ -32,6 +32,8 @@ class MergeTDLs(object):
             self.printelements(root)
         self.log.debug("Merging files *******************" % self.files)
         merged = self.mergefiles()
+        merged = self.addate(merged)
+                
         self.log.debug("Printing merged structure *******************")    
         if self.log.isEnabledFor(logging.DEBUG):
             s = self.printelements(merged.getroot())
@@ -43,6 +45,9 @@ class MergeTDLs(object):
         if self.outfile != sys.stdout:
             self.log.info("Done writing file %s" % self.outfile)
             self.outfile.close()
+
+    def adddate(self, tdltree):
+        return tdltree
 
     def mergefiles(self):
         first = None
@@ -154,10 +159,10 @@ class MergeTDLs(object):
         indent = "   " * depth
         s = ""
         if elem.text != None and elem.text.strip() != '':
-            s += "%s %s %s: '%s'" % (indent, elem.tag, elem.attrib, elem.text.strip())
+            s += "%s %s %s: '%s'\n" % (indent, elem.tag, elem.attrib, elem.text.strip())
             #self.log.debug("%s %s %s: '%s'" % (indent, elem.tag, elem.attrib, elem.text.strip()))
         else:
-            s += "%s %s %s" % (indent, elem.tag, elem.attrib)
+            s += "%s %s %s\n" % (indent, elem.tag, elem.attrib)
             #self.log.debug("%s %s %s" % (indent, elem.tag, elem.attrib))
         for child in elem:
             s += self.printelements(child, depth + 1)

@@ -15,3 +15,5 @@ glance  image-create --name sl6-x86_64-wn-atlas --is-public=False  --disk-format
 
 CONVERTER SCRIPT
 ./ec2-pv2hvm ami-a476eccc testhvm atlas-se-hvm jhoverssh launch-wizard-12 us-east-1 m3.xlarge us-east-1d
+
+
