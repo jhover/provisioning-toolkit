@@ -17,3 +17,4 @@ CONVERTER SCRIPT
 ./ec2-pv2hvm ami-a476eccc testhvm atlas-se-hvm jhoverssh launch-wizard-12 us-east-1 m3.xlarge us-east-1d
 
 
+./ec2-pv2hvm ami-b7dbb2d2 testhvm centos6-cloud-condor-stable-osg-atlas--2015-09-10-hvm jhoverssh all-open us-east-1 m3.xlarge us-east-1a

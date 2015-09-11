@@ -46,13 +46,13 @@ sleep_t_volume_snap=10
 sleep_t_ami_create=10
 
 # Maximum sleep iteration cycles before giving up on any of the operations listed above
-max_sleep_iterations=20
+max_sleep_iterations=60
 
 # --------------------------------------------------------
 # Other timeouts
 
 # Waiting period before proceeding with conversion VM termination and snapshots deletion, sec
-sleep_t_before_term_conv_VM=20
+sleep_t_before_term_conv_VM=360
 
 # Waiting period between terminating conversion VM and deleting the snaphots, sec
 sleep_t_before_del_snap=10
@@ -195,7 +195,7 @@ fi
 echo -e "$out_source_ami_id"|sed 's/^/  + /'
 
 echo -e "\n### Conversion VM image status [name=\"$conv_instance_ami_name\"]:"
-conv_instance_ami_id=`ec2-describe-images|grep $conv_instance_ami_name|grep ami|cut -f 2`
+conv_instance_ami_id=`ec2-describe-images|grep "$conv_instance_ami_name" | grep ami|cut -f 2`
 if [ -z "$conv_instance_ami_id" ]; then
     echo -e "\n### Error: conversion VM image \"$conv_instance_ami_name\" is missing! Exiting..."
     exit 127
@@ -299,28 +299,27 @@ echo " VM [ $conv_VM_pub_IP ] is now running"
 echo -en "Waiting for the instance [ $conv_VM_id ] to become accessible via SSH: "
 it_counter=0
 while true; do
-
     let it_counter=$(($it_counter+1))
     if [ $it_counter -gt $max_sleep_iterations ]; then
         echo -e "\n### Error: maximum of ${max_sleep_iterations}x $sleep_t_instance_ip sec iterations is reached - requesting the conversion VM termination and snapshot deletion and exiting..."
         ec2-terminate-instances $conv_VM_id;sleep $sleep_t_before_del_snap;ec2-delete-snapshot $snap_r1;ec2-delete-snapshot $snap_r2
         exit 126
     fi
-
+    echo "ssh ${ssh_opt_t} ${ec2_user}@${conv_VM_pub_IP} \"hostname\" >& /dev/null"
     ssh ${ssh_opt_t} ${ec2_user}@${conv_VM_pub_IP} "hostname" >& /dev/null
-    [ $? == 0 ] && break 
+    [ $? == 0 ] && break
     echo -n "."
-
     sleep $sleep_t_instance_ip
-
 done
 echo " VM [ $conv_VM_pub_IP ] is sccessible via SSH"
 
+sleep 60
 # --------------------------------------------------------
 # Deploying the conversion script on a VM and executing it
 
 echo -e "\n### Deploying the conversion script on the VM [ $conv_VM_pub_IP ]:"
-scp ${scp_opt_t} $conv_script ${ec2_user}@${conv_VM_pub_IP}:~/
+echo -e "scp ${scp_opt_t} $conv_script ${ec2_user}@${conv_VM_pub_IP}:"
+scp ${scp_opt_t} $conv_script ${ec2_user}@${conv_VM_pub_IP}:
 
 echo -e "\n### Running the conversion script on the VM [ $conv_VM_pub_IP ]:"
 
@@ -402,7 +401,7 @@ echo "##########################################################################
 echo
 
 echo -e "### Creting a new AMI from snapshot [ $snap_dst ]: "
-output_ami_id=`ec2-register -n $destination_ami_name  -d "pv2hvm conversion of PV $source_ami_id image" -s $snap_dst --virtualization-type hvm -a x86_64|grep IMAGE|cut -f 2`
+output_ami_id=`ec2-register -n $destination_ami_name -b "/dev/sdb=ephemeral0" -d "pv2hvm conversion of PV $source_ami_id image" -s $snap_dst --virtualization-type hvm -a x86_64|grep IMAGE|cut -f 2`
 
 ec2-describe-images $output_ami_id
 

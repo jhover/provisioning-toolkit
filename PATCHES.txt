@@ -1,0 +1,37 @@
+Imagefactory 1.1.17:
+
+OZ
+
+/usr/lib/python2.6/site-packages/oz/RHEL_X.py
+  def get_supported_string():
+    """
+    Return supported versions as a string.
+    """
+    return "RHEL/OL/CentOS/Scientific Linux{,CERN} 6: 0, 1, 2, 3, 4, 5, 6"
+
+
+IMGFAC
+
+Time fix for description. 
+
+    /usr/lib/python2.6/site-packages/imagefactory_plugins/EC2/EC2.py
+    ec2_push_image_upload_ebs()
+    
+    result = conn.register_image(name='ImageFactory created AMI - %s' % (self.new_image_id),
+                            description='ImageFactory created AMI - %s' % (self.new_image_id),
+                            architecture=self.tdlobj.arch,  kernel_id=aki,
+                            root_device_name='/dev/sda1', block_device_map=block_map)
+    
+    import time
+    now = time.strftime("-%Y-%m-%d-%H%M")     
+    result = conn.register_image(name='%s-%s-%s' % (self.tdlobj.name, now, self.new_image_id ),
+                            description='ImageFactory created AMI - %s-%s-%s' % (self.tdlobj.name, 
+                            													now,
+                            													self.new_image_id),
+                            architecture=self.tdlobj.arch,  kernel_id=aki,
+                            root_device_name='/dev/sda1', block_device_map=block_map)
+
+To run EC2 upload, remove Nova.info from plugins.d, but needed for openstack-kvm build. 
+
+
+    

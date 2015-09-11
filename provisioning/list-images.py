@@ -17,6 +17,28 @@ import datetime
 from xml.etree import ElementTree
 
 
+class ImageInfo(object):
+    
+    def __init__(self,filetime,identifier,status,name,type, target, provider, provider_identifier):
+        self.filetime = filetime
+        self.identifier = identifier
+        stl = status.lower()
+        self.status = stl
+        self.name = name
+        self.type = type
+        self.target = target
+        self.provider = provider
+        self.pidentifier = provider_identifier
+        
+        
+    def __str__(self):
+        s = "Image: "
+        s += " %s " % self.filetime
+        s+= " %s " % self.identifier
+        s+= " %s " % self.status
+        
+        
+
 #json_file='a.json' 
 filelist = glob.glob("%s/*.meta" % imagedir)
 
