@@ -80,6 +80,7 @@ def list_images(removefailed=False):
             uuid= data['identifier']
             for suf in ['meta','body','body.gz','body.gz-factory-compressed']:
                 p = "%s/%s.%s" % (imagedir, uuid, suf)
+                print("Removing %s" % p)
                 os.remove(p)
         
         
