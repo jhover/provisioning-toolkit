@@ -276,7 +276,13 @@ Image ID on provider: ami-7c39a814
 Image build completed SUCCESSFULLY!
         
         '''
-        cmd = "time imagefactory %s --debug provider_image --id %s %s %s %s " % (uuid, 
+        hvmstr = " "
+        if self.format == 'hvm':
+            hvmstr = " --parameter ec2_flatten false --parameter ec2_modify false  --parameter ec2_ami_type ebs --parameter ec2_virt_type hvm "     
+        
+
+        cmd = "time imagefactory %s --debug provider_image %s --id %s %s %s %s " % (hvmstr,
+                                                                                    uuid, 
                                                                                  self.target,
                                                                                  self.provider, 
                                                                                  self.credentials)
