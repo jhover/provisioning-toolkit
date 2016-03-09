@@ -74,7 +74,15 @@ def list_images(removefailed=False):
             s+= " %s " % data['provider']
             s+= " %s " % data['identifier_on_provider']
         s+= "\n"
-        out += s
+        out+= s
+        
+        if removefailed == True:
+            uuid= data['identifier']
+            for suf in ['meta','body','body.gz','body.gz-factory-compressed']:
+                p = "%s/%s.%s" % (imagedir, uuid, suf)
+                os.remove(p)
+        
+        
     return out
 
 
