@@ -7,11 +7,12 @@ imagedir = "/var/lib/imagefactory/storage"
 
 #
 #
-
+import getopt
 import glob
 import json
 from os import path
 from pprint import pprint
+import sys
 import time
 import datetime
 from xml.etree import ElementTree
