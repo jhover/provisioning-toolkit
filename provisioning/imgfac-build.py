@@ -246,8 +246,13 @@ Image build completed SUCCESSFULLY!
 
         '''
         
-
-        cmd = "time imagefactory --debug target_image --id %s %s " % (uuid, self.target)       
+        hvmstr = " "
+        if self.format == 'hvm':
+            hvmstr = " --parameter ec2_flatten false --parameter ec2_modify false  --parameter ec2_ami_type ebs --parameter ec2_virt_type hvm "     
+        
+        cmd = "time imagefactory --debug target_image %s --id %s %s " % (hvmstr,
+                                                                         uuid, 
+                                                                         self.target)       
         self.log.info("Running imagefactory: '%s'" % cmd)
         (out, err) = self.run_timed_command(cmd)
         ret = self.parse_imagefactory_return(out)
@@ -257,6 +262,7 @@ Image build completed SUCCESSFULLY!
             return ret.uuid
         else:
             raise ImgfacBuildTargetException()
+
 
     def run_imagefactory_provider(self, uuid):
         '''
@@ -270,11 +276,7 @@ Image ID on provider: ami-7c39a814
 Image build completed SUCCESSFULLY!
         
         '''
-        hvmstr = " "
-        if self.format == 'hvm':
-            hvmstr = " --parameter ec2_flatten false --parameter ec2_modify false  --parameter ec2_ami_type ebs --parameter ec2_virt_type hvm "     
-        cmd = "time imagefactory %s --debug provider_image --id %s %s %s %s " % (hvmstr,
-                                                                                 uuid, 
+        cmd = "time imagefactory %s --debug provider_image --id %s %s %s %s " % (uuid, 
                                                                                  self.target,
                                                                                  self.provider, 
                                                                                  self.credentials)
@@ -291,7 +293,6 @@ Image build completed SUCCESSFULLY!
             raise ImgfacBuildProviderException()
            
                    
-
     def run_timed_command(self, cmd):
         #
         # This is necessary because using subprocess.PIPE and p.communicate() hangs when
