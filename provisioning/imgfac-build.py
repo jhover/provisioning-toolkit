@@ -569,6 +569,12 @@ def main():
         log.setLevel(logging.INFO) # Override with command line switches
     
     log.debug("%s" %sys.argv)
+    
+    if listbuilds:
+        for label in config.sections():
+            print(label)
+            sys.exit(0)
+    
     if profile:
         log.info("profile %s specified" % profile)
     else:
@@ -629,15 +635,12 @@ def main():
             val = config.get(profile, option)
             s+= " %s=%s " % ( option, val )
         log.debug(s)
-    if listbuilds:
-        for label in config.sections():
-            print(label)
-    else:
     
-        log.debug("Creating ImgFacBuild object...") 
-        ifb = ImgFacBuild(config, profile)
-        log.debug("Running build...") 
-        ifb.build()
+
+    log.debug("Creating ImgFacBuild object...") 
+    ifb = ImgFacBuild(config, profile)
+    log.debug("Running build...") 
+    ifb.build()
     
 
 
