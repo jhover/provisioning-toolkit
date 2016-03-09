@@ -131,7 +131,7 @@ def main():
             removefailed = True               
 
     s = list_images(removefailed = removefailed)
-    print(s)
+    print(s[:-1])
 
 
 if __name__ == "__main__": 

@@ -473,7 +473,7 @@ def main():
     argv = sys.argv[1:]
     try:
         opts, args = getopt.getopt(argv, 
-                                   "hdvc:t:r:L:l:o:w:Tp:P:C:f:", 
+                                   "hdvc:t:r:L:lo:w:Tp:P:C:f:", 
                                    ["help", 
                                     "debug", 
                                     "verbose",
