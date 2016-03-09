@@ -79,14 +79,15 @@ def list_images(removefailed=False):
         
         if removefailed == True:
             uuid= data['identifier']
-            for suf in ['meta','body','body.gz','body.gz-factory-compressed']:
-                p = "%s/%s.%s" % (imagedir, uuid, suf)
-                
-                try:
-                    os.remove(p)
-                    print("Removed %s" % p)
-                except OSError:
-                    pass 
+            state= data['status']
+            if state == 'failed':
+                for suf in ['meta','body','body.gz','body.gz-factory-compressed']:
+                    p = "%s/%s.%s" % (imagedir, uuid, suf)
+                    try:
+                        os.remove(p)
+                        print("Removed %s" % p)
+                    except OSError:
+                        pass 
     return out
 
 
