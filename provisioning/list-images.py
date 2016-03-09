@@ -10,6 +10,7 @@ imagedir = "/var/lib/imagefactory/storage"
 import getopt
 import glob
 import json
+import os
 from os import path
 from pprint import pprint
 import sys
