@@ -116,7 +116,9 @@ def main():
         elif opt in ("-R", "--removefailed"):
             removefailed = True               
 
-    list_images(removefailed = removefailed)
+    s = list_images(removefailed = removefailed)
+    print(s)
+
 
 if __name__ == "__main__": 
     main()
