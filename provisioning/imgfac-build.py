@@ -440,6 +440,7 @@ def main():
     tdlonly = False
     logfile = sys.stderr
     outfile = sys.stdout
+    listbuilds = False
     workdir = os.path.expanduser("~/tmp")
     profile = None
     target = None
@@ -472,7 +473,7 @@ def main():
     argv = sys.argv[1:]
     try:
         opts, args = getopt.getopt(argv, 
-                                   "hdvc:t:r:L:o:w:Tp:P:C:f:", 
+                                   "hdvc:t:r:L:l:o:w:Tp:P:C:f:", 
                                    ["help", 
                                     "debug", 
                                     "verbose",
@@ -480,6 +481,7 @@ def main():
                                     "target=",
                                     "fileroot=",
                                     "logfile=",
+                                    "list",
                                     "outfile=",
                                     "workdir=",
                                     "tdl",
@@ -508,6 +510,8 @@ def main():
             fileroot = arg
         elif opt in ("-L","--logfile"):
             logfile = arg
+        elif opt in ("-l","--list"):
+            listbuilds = True
         elif opt in ("-w", "--workdir"):
             workdir = arg               
         elif opt in ("-T", "--tdl"):
@@ -625,10 +629,15 @@ def main():
             val = config.get(profile, option)
             s+= " %s=%s " % ( option, val )
         log.debug(s)
-    log.debug("Creating ImgFacBuild object...") 
-    ifb = ImgFacBuild(config, profile)
-    log.debug("Running build...") 
-    ifb.build()
+    if listbuilds:
+        for label in config.sections():
+            print(label)
+    else:
+    
+        log.debug("Creating ImgFacBuild object...") 
+        ifb = ImgFacBuild(config, profile)
+        log.debug("Running build...") 
+        ifb.build()
     
 
 
