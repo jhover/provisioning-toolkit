@@ -573,7 +573,7 @@ def main():
     if listbuilds:
         for label in config.sections():
             print(label)
-            sys.exit(0)
+        sys.exit(0)
     
     if profile:
         log.info("profile %s specified" % profile)
