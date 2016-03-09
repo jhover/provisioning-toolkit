@@ -67,6 +67,7 @@ class ImgFacBuild(object):
         self.target = config.get(profile,'target')
         self.provider = config.get(profile,'provider')    
         self.credentials = os.path.expanduser(config.get(profile, 'credentials'))
+        self.format = config.get(profile,'format')
       
         # Fix None values.  
         if self.target == 'None': 
@@ -75,6 +76,8 @@ class ImgFacBuild(object):
             self.provider = None
         if self.credentials == 'None':
             self.credentials = None        
+        if self.format == 'None':
+            self.format = None
 
         self.log.debug("%s" % self)
        
@@ -86,9 +89,10 @@ class ImgFacBuild(object):
         s += "tdlonly = %s " % self.tdlonly
         s += "workdir = %s " % self.workdir
         s += "templates = %s" % self.templates
+        s += "credentials = %s " % self.credentials
+        s += "format = %s " % self.format
         return s
-
-    
+   
         
         
     def build(self):
@@ -243,7 +247,7 @@ Image build completed SUCCESSFULLY!
         '''
         
 
-        cmd = "time imagefactory --debug target_image --id %s %s " % (uuid, self.target)
+        cmd = "time imagefactory --debug target_image --id %s %s " % (uuid, self.target)       
         self.log.info("Running imagefactory: '%s'" % cmd)
         (out, err) = self.run_timed_command(cmd)
         ret = self.parse_imagefactory_return(out)
@@ -266,11 +270,15 @@ Image ID on provider: ami-7c39a814
 Image build completed SUCCESSFULLY!
         
         '''
-              
-        cmd = "time imagefactory --debug provider_image --id %s %s %s %s " % (uuid, 
-                                                                        self.target,
-                                                                        self.provider, 
-                                                                        self.credentials)
+        hvmstr = " "
+        if self.format == 'hvm':
+            hvmstr = " --parameter ec2_flatten false --parameter ec2_modify false  --parameter ec2_ami_type ebs --parameter ec2_virt_type hvm "     
+        cmd = "time imagefactory --debug provider_image --id %s %s %s %s " % (hvmstr,
+                                                                              uuid, 
+                                                                              self.target,
+                                                                              self.provider, 
+                                                                              self.credentials)
+        
         self.log.info("Running imagefactory: '%s'" % cmd)
         (out, err) = self.run_timed_command(cmd)
         ret = self.parse_imagefactory_return(out)
@@ -437,6 +445,7 @@ def main():
     target = None
     provider = None
     credentials = None
+    format = None 
     default_configfile = os.path.expanduser("~/etc/imgfac.conf")
     config_file = None
     
@@ -463,7 +472,7 @@ def main():
     argv = sys.argv[1:]
     try:
         opts, args = getopt.getopt(argv, 
-                                   "hdvc:t:r:L:o:w:Tp:P:C:", 
+                                   "hdvc:t:r:L:o:w:Tp:P:C:f:", 
                                    ["help", 
                                     "debug", 
                                     "verbose",
@@ -477,6 +486,7 @@ def main():
                                     "profile=",
                                     "provider=",
                                     "credentials=",
+                                    "format=",
                                     ])
     except getopt.GetoptError, error:
         print( str(error))
@@ -508,6 +518,8 @@ def main():
             provider = arg
         elif opt in ("-C", "--credentials"):
             credentials = arg
+        elif opt in ("-f", "--format"):
+            format = arg
 
     # Read in config file
     #config=SafeConfigParser(allow_no_value=True)
@@ -565,6 +577,7 @@ def main():
         provider=
         credentials=
         templates=
+        format=
         
         '''
         # Create ad-hoc profile for command line args...
@@ -600,6 +613,12 @@ def main():
             config.set(profile, 'credentials', credentials )
         else:
             config.set(profile, 'credentials', 'None' )        
+        
+        if format:
+            config.set(profile, 'format', credentials )
+        else:
+            config.set(profile, 'format', 'None' )
+        
         
         s = "[%s]" % profile
         for option in config.options(profile):
