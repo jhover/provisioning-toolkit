@@ -281,7 +281,7 @@ Image build completed SUCCESSFULLY!
             hvmstr = " --parameter ec2_flatten false --parameter ec2_modify false  --parameter ec2_ami_type ebs --parameter ec2_virt_type hvm "     
         
 
-        cmd = "time imagefactory %s --debug provider_image %s --id %s %s %s %s " % (hvmstr,
+        cmd = "time imagefactory %s --debug provider_image --id %s %s %s %s " % (hvmstr,
                                                                                     uuid, 
                                                                                  self.target,
                                                                                  self.provider, 
