@@ -84,6 +84,7 @@ def list_images(removefailed=False):
                 for suf in ['meta','body','body.gz','body.gz-factory-compressed']:
                     p = "%s/%s.%s" % (imagedir, uuid, suf)
                     try:
+                        print("Attempting to remove %s" % p)
                         os.remove(p)
                         print("Removed %s" % p)
                     except OSError:
