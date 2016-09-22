@@ -105,7 +105,7 @@ def main():
     """
     debug = False
     verbose = False
-    removefailed = False
+    rf = False
     
     argv = sys.argv[1:]
     try:
@@ -129,9 +129,9 @@ def main():
         elif opt in ("-v", "--verbose"):
             debug = True
         elif opt in ("-R", "--removefailed"):
-            removefailed = True               
+            rf = True               
 
-    s = list_images(removefailed = removefailed)
+    s = list_images(removefailed = rf)
     print(s[:-1])
 
 
