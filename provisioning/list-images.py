@@ -40,7 +40,7 @@ class ImageInfo(object):
         s+= " %s " % self.status
 
 
-def list_images(removefailed=False):
+def list_images(removefailed):
     #json_file='a.json' 
 
     out = ""
@@ -77,7 +77,7 @@ def list_images(removefailed=False):
         s+= "\n"
         out+= s
         
-        if removefailed == True:
+        if removefailed:
             uuid= data['identifier']
             state= data['status']
             if state == 'failed':
@@ -88,7 +88,9 @@ def list_images(removefailed=False):
                         os.remove(p)
                         print("Removed %s" % p)
                     except OSError:
-                        pass 
+                        pass
+        else:
+            print("Not removing failed.") 
     return out
 
 
