@@ -90,7 +90,8 @@ def list_images(removefailed):
                     except OSError:
                         pass
         else:
-            print("Not removing failed.") 
+            pass
+            #print("Not removing failed.") 
     return out
 
 
