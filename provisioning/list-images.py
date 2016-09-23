@@ -79,7 +79,7 @@ def list_images(removefailed):
         
         if removefailed:
             uuid= data['identifier']
-            state= data['status']
+            state=data['status'].lower()
             if state == 'failed':
                 for suf in ['meta','body','body.gz','body.gz-factory-compressed']:
                     p = "%s/%s.%s" % (imagedir, uuid, suf)
