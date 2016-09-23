@@ -84,9 +84,9 @@ def list_images(removefailed):
                 for suf in ['meta','body','body.gz','body.gz-factory-compressed']:
                     p = "%s/%s.%s" % (imagedir, uuid, suf)
                     try:
-                        print("Attempting to remove %s" % p)
+                        #print("Attempting to remove %s" % p)
                         os.remove(p)
-                        print("Removed %s" % p)
+                        #print("Removed %s" % p)
                     except OSError:
                         pass
         else:
@@ -131,7 +131,7 @@ def main():
         elif opt in ("-v", "--verbose"):
             debug = True
         elif opt in ("-R", "--removefailed"):
-            print("RF true")
+            #print("RF true")
             rf = True               
 
     s = list_images(rf)
