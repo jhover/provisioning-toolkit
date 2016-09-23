@@ -131,9 +131,10 @@ def main():
         elif opt in ("-v", "--verbose"):
             debug = True
         elif opt in ("-R", "--removefailed"):
+            print("RF true")
             rf = True               
 
-    s = list_images(removefailed = rf)
+    s = list_images(rf)
     print(s[:-1])
 
 
